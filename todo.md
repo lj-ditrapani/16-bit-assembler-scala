@@ -1,0 +1,6 @@
+- Move tile code to separate class
+- Only run tile code if -t or --tile
+- Otherwise, run assembler code
+- main assembler parser
+- scene parser (uses bg-cell parser)
+- bg-cell parser
