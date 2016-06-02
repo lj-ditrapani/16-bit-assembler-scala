@@ -1,10 +1,10 @@
 package info.ditrapani.tilecreator
 
 class MainSpec extends Spec {
-  describe("Adder") {
-    describe("add") {
-      it("makes new adder with summed value") {
-        Adder(7).add(3).base should === (10)
+  describe("Class") {
+    describe("method") {
+      it("always passes") {
+        true should === (true)
       }
     }
   }
