@@ -1,4 +1,4 @@
-package info.ditrapani.tilecreator
+package info.ditrapani.asm
 
 import org.scalatest.{FunSpec, Matchers}
 
