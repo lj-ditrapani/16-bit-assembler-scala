@@ -1,11 +1,9 @@
+- make code return try or either, then
+    - if Left/Failure, print help
+    - if Success(Array[Byte]), write Array to stdout
+    - less duplication & side-effects
 - help.txt : print if
-    - 0 args
-    - > 2 args
-    - = 2 args & 1st arg not -t or --tiles
     - fail to open file arg
-- Move tile code to separate class
-- Only run tile code if -t or --tile
-- Otherwise, run assembler code
 - main assembler parser
 - scene parser (uses bg-cell parser)
 - bg-cell parser
