@@ -1,7 +1,7 @@
 package info.ditrapani.asm.tiles
 
 object Tiles {
-  def parseStr(str: String): Unit = {
+  def parseStr(str: String): Either[String, Seq[Byte]] = {
     import fastparse.all._
 
     val large_tile_header = P("Large Tiles\n")
@@ -51,17 +51,9 @@ object Tiles {
       End
     ).map((x) => x._1 ++ x._2 ++ x._3)
     parseFile.parse(str) match {
-      case Parsed.Success(value, index) => toSdout(value)
-      case x: Parsed.Failure => println(s"${x}")
+      case Parsed.Success(value, index) => Right(value)
+      case x: Parsed.Failure => Left(s"${x}")
     }
-  }
-
-  def toSdout(s: Seq[Byte]): Unit = {
-    import java.io.BufferedOutputStream
-
-    var out = new BufferedOutputStream(System.out)
-    out.write(s.toArray)
-    out.flush
   }
 }
 

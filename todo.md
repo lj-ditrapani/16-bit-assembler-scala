@@ -1,9 +1,3 @@
-- make code return try or either, then
-    - if Left/Failure, print help
-    - if Success(Array[Byte]), write Array to stdout
-    - less duplication & side-effects
-- help.txt : print if
-    - fail to open file arg
 - main assembler parser
 - scene parser (uses bg-cell parser)
 - bg-cell parser
