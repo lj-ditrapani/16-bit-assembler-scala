@@ -1,6 +1,5 @@
 package info.ditrapani.asm
 
-
 object Main {
   def main(args: Array[String]): Unit = {
     import scala.util.{Try, Success, Failure}

@@ -1,3 +1,8 @@
+- help.txt : print if
+    - 0 args
+    - > 2 args
+    - = 2 args & 1st arg not -t or --tiles
+    - fail to open file arg
 - Move tile code to separate class
 - Only run tile code if -t or --tile
 - Otherwise, run assembler code
