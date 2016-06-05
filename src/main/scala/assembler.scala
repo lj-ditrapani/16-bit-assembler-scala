@@ -21,10 +21,13 @@ object Assembler {
     val lowercase = P(CharIn('a' to 'z'))
     val letter = P(lowercase | uppercase)
     val number = P(digit.rep(1).!.map(_.toInt))
-    val symbol = P(letter ~/ (letter | digit | "-" | "_").rep(min = 0)).!
+    val symbol = P(letter.! ~ (letter | digit | "-" | "_").rep.!).map((x) => {
+      println(s"Got a symbol ${x._1 + x._2}")
+      x._1 + x._2
+    })
     val symbol_entry = P(
-      noise ~/ " ".rep ~/ symbol ~/ spaces ~/ number ~/ tail_noise
-    )
+      noise ~ " ".rep ~ Index ~ symbol ~/ spaces ~/ number ~/ tail_noise
+    ).map((x) => SymbolEntry(x._1, x._2, Right(x._3)))
     val symbols_section = P(
       ".symbols\n" ~/ Index ~/ symbol_entry.rep ~/ noise ~/ ".end-symbols"
     )
@@ -41,4 +44,21 @@ object Assembler {
     println(s)
     Right(Vector(65, 66, 67).map(_.toByte))
   }
+
+  type SymbolValue = Either[String, Int]
+
+  case class SymbolEntry(index: Int, key: String, value: SymbolValue)
+}
+
+object NumberParser {
+  import fastparse.all._
+
+  val decimal_digit = P(CharIn('0' to '9'))
+  var hex_letters = P(CharIn('a' to 'f') | CharIn('A' to 'F'))
+  val hex_digit = P(decimal_digit | hex_letters)
+  val binary_digit = P(CharIn("01"))
+  val decimal = (("+" | "-").? ~/ decimal_digit ~/ (decimal_digit | "_").rep)
+  val hex = P("$" ~/ hex_digit ~/ (hex_digit | "_").rep)
+  val binary = P("%" ~/ binary_digit ~/ (binary_digit | "_").rep)
+  val number = (decimal | hex | binary)
 }
