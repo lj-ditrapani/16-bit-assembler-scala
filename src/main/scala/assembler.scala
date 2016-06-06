@@ -26,20 +26,36 @@ object Assembler {
       x._1 + x._2
     })
     val symbol_entry = P(
-      noise ~ " ".rep ~ Index ~ symbol ~/ spaces ~/ number ~/ tail_noise
+      Index ~ symbol ~/ spaces ~/ number ~/ tail_noise
     ).map((x) => SymbolEntry(x._1, x._2, Right(x._3)))
+    val symbol_section_line = P((" ".rep ~ (comment | symbol_entry).? ~ "\n"))
     val symbols_section = P(
-      ".symbols\n" ~/ Index ~/ symbol_entry.rep ~/ noise ~/ ".end-symbols"
+      ".symbols\n" ~/ symbol_section_line.rep ~/ ".end-symbols" ~/ tail_noise
     )
-    val file = P(Start ~/ noise ~/ symbols_section)
-    // Start ~/ noise ~/ symbols_section ~/
-    //   noise ~/ data_section ~/
-    //   noise ~/ program_section ~/
-    //   noise ~/ End
-    //   command = command_stuff ~/ P(tail_noise ~ "\n")
+    val data_entry = P(
+      Index ~ "word" ~/ spaces ~/ symbol ~/ spaces ~/ number ~/ tail_noise
+    )
+    val data_section_line = P(" ".rep ~ (comment | data_entry).? ~ "\n")
+    val data_section = P(
+      ".data\n" ~/ data_section_line.rep ~/ ".end-data" ~/ tail_noise
+    )
+    val program_entry = P(Index ~ symbol.rep(3, sep = spaces) ~/ tail_noise)
+    val program_section_line = P(" ".rep ~ (comment | program_entry).? ~ "\n")
+    val program_section = P(
+      ".program\n" ~/ program_section_line.rep ~/ ".end-program" ~/ tail_noise
+    )
+    val file = P(
+      Start ~/ noise ~/
+      symbols_section ~/ noise ~/
+      data_section ~/ noise ~/
+      program_section ~/ noise ~/
+      End
+    )
     val s = file.parse(text) match {
-      case f: Parsed.Failure => f.toString + "\n" + f.extra.traced.trace.split("/").mkString("\n")
-      case s: Parsed.Success[Int] => s.toString
+      case f: Parsed.Failure =>
+        f.toString + "\n" + f.extra.traced.trace.split("/").mkString("\n")
+      case s: Parsed.Success[Int] =>
+        s.toString
     }
     println(s)
     Right(Vector(65, 66, 67).map(_.toByte))
@@ -53,11 +69,13 @@ object Assembler {
 object NumberParser {
   import fastparse.all._
 
+  // validate number?  .filter  but concerned about error message
+
   val decimal_digit = P(CharIn('0' to '9'))
-  var hex_letters = P(CharIn('a' to 'f') | CharIn('A' to 'F'))
+  val hex_letters = P(CharIn('a' to 'f') | CharIn('A' to 'F'))
   val hex_digit = P(decimal_digit | hex_letters)
   val binary_digit = P(CharIn("01"))
-  val decimal = (("+" | "-").? ~/ decimal_digit ~/ (decimal_digit | "_").rep)
+  val decimal = (("+" | "-").? ~ decimal_digit ~/ (decimal_digit | "_").rep)
   val hex = P("$" ~/ hex_digit ~/ (hex_digit | "_").rep)
   val binary = P("%" ~/ binary_digit ~/ (binary_digit | "_").rep)
   val number = (decimal | hex | binary)
