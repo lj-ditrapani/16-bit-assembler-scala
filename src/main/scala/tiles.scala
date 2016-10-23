@@ -4,8 +4,7 @@ object Tiles {
   def parseStr(str: String): Either[String, Seq[Byte]] = {
     import fastparse.all._
 
-    val large_tile_header = P("Large Tiles\n")
-    val large_tile_ruler = P("  0 1 2 3 4 5 6 7 8 9 A B C D E F\n")
+    val tile_ruler = P("  0 1 2 3 4 5 6 7 8 9 A B C D E F\n")
     val pixel0 = P("[]").map((x) => 0)
     val pixel1 = P("()").map((x) => 1)
     val pixel2 = P("{}").map((x) => 2)
