@@ -5,7 +5,7 @@ class NumberParserSpec extends Spec {
     def run_tests(num_type: String, tests: Seq[(String, Int)]): Unit = {
       for(test <- tests) {
         val (string, num) = test
-        it(s"parses ${num_type} values:  ${string} => ${num}") {
+        ignore(s"parses ${num_type} values:  ${string} => ${num}") {
           check(string, num)
         }
       }
