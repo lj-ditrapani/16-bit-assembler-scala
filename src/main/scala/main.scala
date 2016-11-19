@@ -19,11 +19,11 @@ object Main {
   def printHelpText(msg: String): Unit = {
     msg match {
       case "" => Unit
-      case _ => println(msg + "\n")
+      case _ => println(msg + "\n") // scalastyle:ignore regex
     }
     val input_stream = getClass.getResourceAsStream("/help.md")
     val help_text = scala.io.Source.fromInputStream(input_stream).mkString
-    println(help_text)
+    println(help_text) // scalastyle:ignore regex
   }
 
   def parseFileArgAndAssemble(file_name: String): Result = {
@@ -32,10 +32,13 @@ object Main {
 
   def parseTilesArgs(args: Array[String]): Result = {
     args(0) match {
-      case "-t" | "--tiles" => 
+      case "-t" | "--tiles" =>
         parseFileArg(args(1), (content) => tiles.Tiles.parseStr(content))
       case _ =>
-        Left("The two argument form is to create binary tile sets, the first argument must be -t or --tiles.")
+        Left(
+          "The two argument form is to create binary tile sets, " +
+          "the first argument must be -t or --tiles."
+        )
     }
   }
 

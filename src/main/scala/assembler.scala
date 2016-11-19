@@ -7,7 +7,7 @@ object Assembler {
     val valid_cahrs = P(
       Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
     )
-    println(valid_cahrs.parse(text))
+    println(valid_cahrs.parse(text)) // scalastyle:ignore regex
 
     val comment = P("#" ~/ CharsWhile(_ != '\n', min = 0))
     val spaces = P(" ".rep(1))
@@ -22,7 +22,7 @@ object Assembler {
     val letter = P(lowercase | uppercase)
     val number = P(digit.rep(1).!.map(_.toInt))
     val symbol = P(letter.! ~ (letter | digit | "-" | "_").rep.!).map((x) => {
-      println(s"Got a symbol ${x._1 + x._2}")
+      println(s"Got a symbol ${x._1 + x._2}") // scalastyle:ignore regex
       x._1 + x._2
     })
     val symbol_entry = P(
@@ -57,7 +57,7 @@ object Assembler {
       case s: Parsed.Success[Int] =>
         s.toString
     }
-    println(s)
+    println(s) // scalastyle:ignore regex
     Right(Vector(65, 66, 67).map(_.toByte))
   }
 
