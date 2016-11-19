@@ -1,5 +1,5 @@
 lazy val root = (project in file(".")).settings(
-  name := "tile-creator",
+  name := "asm16",
   version := "0.1.0",
   scalaVersion := "2.11.8",
   organization := "ditrapani.info"
