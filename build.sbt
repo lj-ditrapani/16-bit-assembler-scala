@@ -6,6 +6,6 @@ lazy val root = (project in file(".")).settings(
 )
 
 libraryDependencies += "com.lihaoyi" %% "fastparse" % "0.4.2"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 assemblyJarName in assembly := s"ljd-${name.value}-${version.value}.jar"
