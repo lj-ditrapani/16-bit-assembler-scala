@@ -1,7 +1,7 @@
 Usage
 -----
 
-    java -jar asm16 [-t | --tiles] file
+    java -jar ljd-asm16-x.x.x.jar [-t | --tiles] file
 
 If only a file is provided as a command line argument, assemble the file into
 a binary executable to run on the [ljd 16-bit computer][ljd 16-bit computer].
@@ -17,11 +17,11 @@ The program can also be used to generate [binary tile sets][video] from
 Examples
 --------
 
-    java -jar asm16 file.asm > bin.file
+    java -jar ljd-asm16-x.x.x.jar file.asm > bin.file
 
-    java -jar asm16 -t main.tiles > tiles.bin
+    java -jar ljd-asm16-x.x.x.jar -t main.tiles > tiles.bin
 
-    java -jar asm16 --tiles main.tiles > tiles.bin
+    java -jar ljd-asm16-x.x.x.jar --tiles main.tiles > tiles.bin
 
 
 
