@@ -1,10 +1,10 @@
 package info.ditrapani.asm
 
 class MainSpec extends Spec {
-  describe("Class") {
-    describe("method") {
-      it("always passes") {
-        true should === (true)
+  describe("main") {
+    describe("-t") {
+      it("transform a good ascii tile file into a binary one") {
+        Main.main(Array("-t", "src/test/resources/built-in.tiles"))
       }
     }
   }
