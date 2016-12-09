@@ -8,8 +8,21 @@ object Tiles {
     val pixel0 = P("[]").map((x) => 0)
     val pixel1 = P("<>").map((x) => 1)
     val pixel = P(pixel0 | pixel1)
-    val tile_row = P("  " ~/ pixel.rep(min = 8, max = 8)).map(Tile.row)
-    val tile_num = P(CharIn("0123456789ABCDEF").rep(min = 2, max = 2) ~/ "\n")
+    val tile_row = P("  " ~/ pixel.rep(exactly = 8)).map(Tile.row)
+    val tile_num = {
+      var i = 0
+      P(CharIn("0123456789ABCDEF").rep(min = 2, max = 2).!.flatMap( actual_str => {
+        val temp = i
+        i += 1
+        val actual = Integer.parseInt(actual_str, 16)
+        (actual == temp) match {
+          case false =>
+            val expected_hex = Integer.toHexString(temp).reverse.padTo(2, '0').reverse
+            Fail.log(s"[Number should be $expected_hex, but was $actual_str]")
+          case true => Pass
+        }
+      }) ~/ "\n")
+    }
     val tile = P(
       tile_num ~/ tile_row.rep(min = 12, max = 12, sep = "\n") ~/ "\n"
     )
