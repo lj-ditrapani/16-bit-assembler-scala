@@ -54,7 +54,7 @@ object Main {
   def toStandardOut(s: Seq[Byte]): Unit = {
     import java.io.BufferedOutputStream
 
-    var out = new BufferedOutputStream(System.out)
+    val out = new BufferedOutputStream(System.out)
     out.write(s.toArray)
     out.flush
   }

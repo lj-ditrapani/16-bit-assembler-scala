@@ -2,7 +2,7 @@ package info.ditrapani.asm
 
 class NumberParserSpec extends Spec {
   describe("number") {
-    def run_tests(num_type: String, tests: Seq[(String, Int)]): Unit = {
+    def runTests(num_type: String, tests: Seq[(String, Int)]): Unit = {
       for(test <- tests) {
         val (string, num) = test
         ignore(s"parses ${num_type} values:  ${string} => ${num}") {
@@ -21,7 +21,7 @@ class NumberParserSpec extends Spec {
     val decimal_tests = List(
       ("+123", 123)
     )
-    run_tests("decimal", decimal_tests)
+    runTests("decimal", decimal_tests)
 
     val hex_tests = List(
       ("$C6A3", 0xC6A3),
@@ -30,7 +30,7 @@ class NumberParserSpec extends Spec {
       ("$0", 0x0),
       ("$C6_A3", 0xC6A3)
     )
-    run_tests("hexadecimal", hex_tests)
+    runTests("hexadecimal", hex_tests)
 
     val bin_tests = List(
       ("%1111_1111", 255),
@@ -38,6 +38,6 @@ class NumberParserSpec extends Spec {
       ("%0000_0000", 0x00),
       ("%1100_0110_1010_0011", 0xC6A3)
     )
-    run_tests("binary", bin_tests)
+    runTests("binary", bin_tests)
   }
 }
