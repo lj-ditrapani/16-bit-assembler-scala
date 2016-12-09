@@ -19,19 +19,23 @@ class TilesSpec extends Spec with EitherValues {
       val s = scala.io.Source.fromInputStream(stream).mkString
       val result: Seq[Byte] = Tiles.parseStr(s).right.value
       result.size shouldBe 1024 * 3
-      // Look at 2nd tile (tile 1), rows 0-2 & 8-10
-      result(12 +  0) shouldBe 0x00   //  [][][][][][][][]  0000 0000
-      result(12 +  1) shouldBe 0x66   //  []<><>[][]<><>[]  0110 0110
-      result(12 +  2) shouldBe 0x66   //  []<><>[][]<><>[]  0110 0110
-      result(12 +  8) shouldBe 0x42   //  []<>[][][][]<>[]  0100 0010
-      result(12 +  9) shouldBe 0x3C   //  [][]<><><><>[][]  0011 1100
-      result(12 + 10) shouldBe 0x18   //  [][][]<><>[][][]  0001 1000
-      // Look at last tile
-      result(3060 +  0) & 0xFF shouldBe 0x00  //  [][][][][][][][]  0000 0000
-      result(3060 +  1) & 0xFF shouldBe 0x80  //  <>[][][][][][][]  1000 0000
-      result(3060 +  2) & 0xFF shouldBe 0xC0  //  <><>[][][][][][]  1000 0000
-      result(3060 +  3) & 0xFF shouldBe 0xE0  //  <><><>[][][][][]  1000 0000
-      result(3060 + 11) & 0xFF shouldBe 0x00  //  [][][][][][][][]  0000 0000
+      // Look at 2nd tile (tile 1)
+      val tile001 = new RowExpecter(result, 12 * 1)
+      tile001.expectRow( 0, 0x00)     //  [][][][][][][][]  0000 0000
+      tile001.expectRow( 1, 0x66)     //  []<><>[][]<><>[]  0110 0110
+      tile001.expectRow( 2, 0x66)     //  []<><>[][]<><>[]  0110 0110
+      tile001.expectRow( 8, 0x42)     //  []<>[][][][]<>[]  0100 0010
+      tile001.expectRow( 9, 0x3C)     //  [][]<><><><>[][]  0011 1100
+      tile001.expectRow(10, 0x18)     //  [][][]<><>[][][]  0001 1000
+      tile001.expectRow(11, 0x00)     //  [][][][][][][][]  0000 0000
+      // Look at last tile (tile 255)
+      val tile255 = new RowExpecter(result, 12 * 255)
+      tile255.expectRow( 0, 0x00)     //  [][][][][][][][]  0000 0000
+      tile255.expectRow( 1, 0x80)     //  <>[][][][][][][]  1000 0000
+      tile255.expectRow( 2, 0xC0)     //  <><>[][][][][][]  1000 0000
+      tile255.expectRow( 3, 0xE0)     //  <><><>[][][][][]  1000 0000
+      tile255.expectRow( 7, 0xFE)     //  <><><><><><><>[]  1111 1110
+      tile255.expectRow(11, 0x00)     //  [][][][][][][][]  0000 0000
     }
 
     it("fails if the first tile number is wrong") {
