@@ -10,8 +10,9 @@ object Tiles {
     val pixel = P(pixel0 | pixel1)
     val tile_row = P("  " ~/ pixel.rep(exactly = 8)).map(Tile.row)
     val tile_num = {
+      @SuppressWarnings(Array("org.wartremover.warts.Var"))
       var i = 0
-      P(CharIn("0123456789ABCDEF").rep(min = 2, max = 2).!.flatMap( actual_str => {
+      P(CharIn("0123456789ABCDEF").rep(exactly = 2).!.flatMap( actual_str => {
         val temp = i
         i += 1
         val actual = Integer.parseInt(actual_str, 16)
@@ -24,11 +25,11 @@ object Tiles {
       }) ~/ "\n")
     }
     val tile = P(
-      tile_num ~/ tile_row.rep(min = 12, max = 12, sep = "\n") ~/ "\n"
+      tile_num ~/ tile_row.rep(exactly = 12, sep = "\n") ~/ "\n"
     )
     val tile_set = P(
       tile_ruler ~/
-      tile.rep(min = 256, max = 256)
+      tile.rep(exactly = 256)
     ).map(_.flatten)
     val parseFile = P(
       Start ~/ tile_set ~/ End
