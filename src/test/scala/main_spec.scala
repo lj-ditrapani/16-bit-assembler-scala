@@ -28,15 +28,19 @@ class MainSpec extends Spec with EitherValues {
 
     describe("with 1 arg") {
       describe("arg is -h") {
-        val args = Array("-h")
-        val result = Main.process(args)
-        result shouldBe Help
+        it("prints the help text") {
+          val args = Array("-h")
+          val result = Main.process(args)
+          result shouldBe Help
+        }
       }
 
       describe("arg is --help") {
-        val args = Array("--help")
-        val result = Main.process(args)
-        result shouldBe Help
+        it("prints the help text") {
+          val args = Array("--help")
+          val result = Main.process(args)
+          result shouldBe Help
+        }
       }
 
       describe("arg is a file") {
@@ -55,6 +59,8 @@ class MainSpec extends Spec with EitherValues {
     }
 
     describe("with 2 args") {
+      val good_file = "src/test/resources/built-in.tiles"
+
       def checkTiles(result: Result): Unit = {
         val value = expectGood(result)
         value.length shouldBe 3072
@@ -62,23 +68,44 @@ class MainSpec extends Spec with EitherValues {
       }
 
       describe("first arg = -t") {
-        it("transforms a good ascii tile file into a binary one") {
-          val args = Array("-t", "src/test/resources/built-in.tiles")
-          val result = Main.process(args)
-          checkTiles(result)
+        describe("second arg is a good ascii tile file") {
+          it("transforms a good ascii tile file into a binary one") {
+            val args = Array("-t", good_file)
+            val result = Main.process(args)
+            checkTiles(result)
+          }
+        }
+
+        describe("second arg is a file, but not a good ascii tile file") {
+          it("prints an error") {
+            val args = Array("-t", "README.md")
+            val result = Main.process(args)
+            val message = """Failure("  0 1 2 3 4 5 6 7\n":1:1 ..."Assembler ")"""
+            expectError(result, message)
+          }
+        }
+
+        describe("second arg is not a file") {
+          it("prints an error") {
+            val args = Array("-t", "not_a_file")
+            val result = Main.process(args)
+            val message = "java.io.FileNotFoundException: not_a_file " +
+              "(No such file or directory)"
+            expectError(result, message)
+          }
         }
       }
 
       describe("first arg = --tiles") {
         it("transforms a good ascii tile file into a binary one") {
-          val args = Array("-t", "src/test/resources/built-in.tiles")
+          val args = Array("-t", good_file)
           val result = Main.process(args)
           checkTiles(result)
         }
       }
 
-      describe("first arg = --tiles") {
-        it("first arg is neither -t nor --tiles") {
+      describe("first arg is neither -t nor --tiles") {
+        it("prints an error") {
           val args = Array("--one", "file")
           val result = Main.process(args)
           val message = "The two argument form is to create binary tile sets, " +
