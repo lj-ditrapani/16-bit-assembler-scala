@@ -27,4 +27,4 @@ wartremoverWarnings ++= Warts.allBut(
   Wart.Overloading
 )
 
-assemblyJarName in assembly := s"ljd-${name.value}-${version.value}.jar"
+assemblyOutputPath in assembly := baseDirectory.value / s"ljd-${name.value}-${version.value}.jar"
