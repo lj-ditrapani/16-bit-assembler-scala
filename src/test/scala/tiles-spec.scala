@@ -42,6 +42,11 @@ class TilesSpec extends Spec with EitherValues {
       tile255.expectRow(11, 0x00)     //  [][][][][][][][]  0000 0000
     }
 
+    it("fails if it can't match a pixel") {
+      val result = Tiles.parseStr(ruler + "00\n" + "  [>").left.value
+      result shouldBe """Failure((pixel0 | pixel1):3:3 ..."[>")"""
+    }
+
     it("fails if the first tile number is wrong") {
       val result = Tiles.parseStr(ruler + "01\n" + tile + "\n01").left.value
       result shouldBe errorMessage("00", "01", 2)
