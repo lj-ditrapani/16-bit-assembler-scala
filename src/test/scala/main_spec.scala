@@ -1,10 +1,21 @@
 package info.ditrapani.asm
 
-class MainSpec extends Spec {
-  describe("main") {
+import org.scalatest.EitherValues
+
+class MainSpec extends Spec with EitherValues {
+  describe("process") {
+    describe("with 0 args") {
+    }
+
     describe("-t") {
-      it("transform a good ascii tile file into a binary one") {
-        Main.main(Array("-t", "src/test/resources/built-in.tiles"))
+      it("transforms a good ascii tile file into a binary one") {
+        val args = Array("-t", "src/test/resources/built-in.tiles")
+        val right = Main.process(args)
+        right shouldBe a[Good]
+        @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+        val result = right.asInstanceOf[Good].binary_file
+        result.length shouldBe 3072
+        result(12 + 1) & 0xFF shouldBe 0x66   //  []<><>[][]<><>[]  0110 0110
       }
     }
   }
