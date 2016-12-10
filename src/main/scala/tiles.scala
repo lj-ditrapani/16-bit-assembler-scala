@@ -36,20 +36,8 @@ object Tiles {
     )
     parseFile.parse(str) match {
       case Parsed.Success(value, index) => Right(value)
-      case x: Parsed.Failure => Left(s"${x}")
+      case failure: Parsed.Failure => Left(failure.toString)
     }
-  }
-}
-
-object Utils {
-  def fourPixels2oneByte(s: Seq[Int]): Byte = {
-    assert(s.size == 4)
-    ((s(0) << 6) + (s(1) << 4) + (s(2) << 2) + s(3)).toByte
-  }
-  def eightPixels2twoBytes(seq: Seq[Int]): Seq[Byte] = {
-    assert(seq.size == 8)
-    val (seq1, seq2) = seq.splitAt(4)
-    Seq(fourPixels2oneByte(seq1), fourPixels2oneByte(seq2))
   }
 }
 
