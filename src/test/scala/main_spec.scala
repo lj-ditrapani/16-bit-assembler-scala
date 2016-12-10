@@ -13,7 +13,7 @@ class MainSpec extends Spec with EitherValues {
         val right = Main.process(args)
         right shouldBe a[Good]
         @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
-        val result = right.asInstanceOf[Good].binary_file
+        val result = right.asInstanceOf[Good].bytes
         result.length shouldBe 3072
         result(12 + 1) & 0xFF shouldBe 0x66   //  []<><>[][]<><>[]  0110 0110
       }

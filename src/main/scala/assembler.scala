@@ -1,7 +1,7 @@
 package info.ditrapani.asm
 
 object Assembler {
-  def apply(text: String): Either[String, Seq[Byte]] = {
+  def apply(text: String): Result = {
     import fastparse.all._
 
     val valid_cahrs = P(
@@ -58,7 +58,7 @@ object Assembler {
         s.toString
     }
     println(s) // scalastyle:ignore regex
-    Right(Vector(65, 66, 67).map(_.toByte))
+    Good(Vector(65, 66, 67).map(_.toByte))
   }
 
   type SymbolValue = Either[String, Int]

@@ -31,19 +31,13 @@ object Main {
   }
 
   def assemble(file_name: String): Result = {
-    parseFileArg(file_name, (content) => Assembler(content)) match {
-      case Left(s) => Error(s)
-      case Right(s) => Good(s)
-    }
+    parseFileArg(file_name, (content) => Assembler(content))
   }
 
   private def textTiles2BinaryTiles(args: Array[String]): Result = {
     args(0) match {
       case "-t" | "--tiles" =>
-        parseFileArg(args(1), (content) => tiles.Tiles.parseStr(content)) match {
-          case Left(s) => Error(s)
-          case Right(s) => Good(s)
-        }
+        parseFileArg(args(1), (content) => tiles.Tiles.parseStr(content))
       case _ =>
         Error(
           "The two argument form is to create binary tile sets, " +
@@ -52,11 +46,11 @@ object Main {
     }
   }
 
-  private def parseFileArg(file_name: String, call_back: String => EResult): EResult = {
+  private def parseFileArg(file_name: String, call_back: String => Result): Result = {
     import scala.util.{Try, Success, Failure}
 
     Try(scala.io.Source.fromFile(file_name).mkString) match {
-      case Failure(exception) => Left(exception.toString)
+      case Failure(exception) => Error(exception.toString)
       case Success(str) => call_back(str)
     }
   }

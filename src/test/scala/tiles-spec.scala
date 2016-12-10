@@ -1,9 +1,9 @@
 package info.ditrapani.asm.tiles
 
+import info.ditrapani.asm
 import info.ditrapani.asm.Spec
-import org.scalatest.EitherValues
 
-class TilesSpec extends Spec with EitherValues {
+class TilesSpec extends Spec {
   val ruler = "  0 1 2 3 4 5 6 7\n"
   val tile = List.fill(12)("  [][][][][][][][]").mkString("\n")
 
@@ -17,7 +17,10 @@ class TilesSpec extends Spec with EitherValues {
     it("passes if the string is well formed") {
       val stream : java.io.InputStream = getClass.getResourceAsStream("/built-in.tiles")
       val s = scala.io.Source.fromInputStream(stream).mkString
-      val result: Seq[Byte] = Tiles.parseStr(s).right.value
+      val good = Tiles.parseStr(s)
+      good shouldBe an[asm.Good]
+      @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+      val result: Seq[Byte] = Tiles.parseStr(s).asInstanceOf[asm.Good].bytes
       result.size shouldBe 1024 * 3
       // Look at 2nd tile (tile 1)
       val tile001 = new RowExpecter(result, 12 * 1)
@@ -39,12 +42,18 @@ class TilesSpec extends Spec with EitherValues {
     }
 
     it("fails if the first tile number is wrong") {
-      val result = Tiles.parseStr(ruler + "01\n" + tile + "\n01").left.value
+      val error = Tiles.parseStr(ruler + "01\n" + tile + "\n01")
+      error shouldBe an[asm.Error]
+      @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+      val result = error.asInstanceOf[asm.Error].message
       result shouldBe """Failure([Number should be 00, but was 01]:2:3 ..."\n  [][][][")"""
     }
 
     it("fails if the second tile number is wrong") {
-      val result = Tiles.parseStr(ruler + "00\n" + tile + "\n00\n" + tile).left.value
+      val error = Tiles.parseStr(ruler + "00\n" + tile + "\n00\n" + tile)
+      error shouldBe an[asm.Error]
+      @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+      val result = error.asInstanceOf[asm.Error].message
       result shouldBe """Failure([Number should be 01, but was 00]:15:3 ..."\n  [][][][")"""
     }
   }
