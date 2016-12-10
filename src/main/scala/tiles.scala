@@ -40,7 +40,8 @@ object Tiles {
       case failure: Parsed.Failure =>
         val input = failure.extra.input
         val Array(line, column) = input.repr.prettyIndex(input, failure.index).split(":")
-        val s = s"Failure parsing ASCII tile file occured at\nLine: $line\nColumn: $column\n"
+        val s = "Failure parsing ASCII tile file occured at\n" +
+          s"Line: $line\nColumn: $column\n"
         Left(s + failure.msg)
     }
   }
