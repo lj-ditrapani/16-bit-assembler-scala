@@ -1,13 +1,7 @@
 package info.ditrapani.asm
 
 object Assembler {
-  def apply(text: String): Either[String, Seq[Byte]] = {
-    import fastparse.all._
-
-    val valid_cahrs = P(
-      Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
-    )
-    println(valid_cahrs.parse(text)) // scalastyle:ignore regex
+  /*
 
     val comment = P("#" ~/ CharsWhile(_ != '\n', min = 0))
     val spaces = P(" ".rep(1))
@@ -22,7 +16,7 @@ object Assembler {
     val letter = P(lowercase | uppercase)
     val number = P(digit.rep(1).!.map(_.toInt))
     val symbol = P(letter.! ~ (letter | digit | "-" | "_").rep.!).map((x) => {
-      println(s"Got a symbol ${x._1 + x._2}") // scalastyle:ignore regex
+      pxrintln(s"Got a symbol ${x._1 + x._2}") // scalastyle:ignore regex
       x._1 + x._2
     })
     val symbol_entry = P(
@@ -51,19 +45,26 @@ object Assembler {
       program_section ~/ noise ~/
       End
     )
-    val s = file.parse(text) match {
-      case f: Parsed.Failure =>
-        f.toString + "\n" + f.extra.traced.trace.split("/").mkString("\n")
-      case s: Parsed.Success[Int] =>
-        s.toString
+    */
+
+  def assemble(text: String): Either[String, Seq[Byte]] = {
+    import fastparse.all._
+
+    val valid_cahrs = P(
+      Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
+    )
+    def parseFile(x: Unit): Either[String, Seq[Byte]] = {
+      // Utils.parsedResult2Either[Seq[Byte]]("assembly", file.parse(text))
+      Right(List(65.toByte, 66.toByte, 10.toByte))
     }
-    println(s) // scalastyle:ignore regex
-    Right(Vector(65, 66, 67).map(_.toByte))
+
+    val result = valid_cahrs.parse(text)
+    Utils.parsedResult2Either[Unit]("assembly", result).flatMap(parseFile)
   }
 
   type SymbolValue = Either[String, Int]
 
-  case class SymbolEntry(index: Int, key: String, value: SymbolValue)
+  final case class SymbolEntry(index: Int, key: String, value: SymbolValue)
 }
 
 object NumberParser {

@@ -42,7 +42,7 @@ object Main {
   }
 
   def assemble(file_name: String): Bytes = {
-    parseFileArg(file_name, (content) => Assembler(content))
+    parseFileArg(file_name, (content) => Assembler.assemble(content))
   }
 
   private def textTiles2BinaryTiles(args: Array[String]): Bytes = {
