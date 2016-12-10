@@ -6,7 +6,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     process(args) match {
       case Help => printHelpText()
-      case Error(msg) => printError(msg)
+      case Error(message) => printError(message)
       case Good(bytes) => toStandardOut(bytes)
     }
   }
@@ -15,7 +15,7 @@ object Main {
     args.exists(arg => (arg == "--help" || arg == "-h")) match {
       case true => Help
       case false => processWithoutHelp(args) match {
-        case Left(s) => Error(s)
+        case Left(message) => Error(message)
         case Right(bytes) => Good(bytes)
       }
     }
@@ -29,7 +29,6 @@ object Main {
       case _ => Left("Too many command line arguments; supply 1 or 2")
     }
   }
-
 
   private def printHelpText(): Unit = {
     val input_stream = getClass.getResourceAsStream("/help.md")
