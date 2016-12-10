@@ -19,7 +19,7 @@ object Tiles {
         (actual == temp) match {
           case false =>
             val expected_hex = Integer.toHexString(temp).reverse.padTo(2, '0').reverse
-            Fail.log(s"[Number should be $expected_hex, but was $actual_str]")
+            Fail.opaque(s"[Number should be $expected_hex, but was $actual_str]")
           case true => Pass
         }
       }) ~/ "\n")

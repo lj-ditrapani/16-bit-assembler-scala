@@ -40,12 +40,12 @@ class TilesSpec extends Spec with EitherValues {
 
     it("fails if the first tile number is wrong") {
       val result = Tiles.parseStr(ruler + "01\n" + tile + "\n01").left.value
-      result shouldBe """Failure(Fail:2:3 ..."\n  [][][][")"""
+      result shouldBe """Failure([Number should be 00, but was 01]:2:3 ..."\n  [][][][")"""
     }
 
     it("fails if the second tile number is wrong") {
-      val result = Tiles.parseStr(ruler + "00\n" + tile + "\n02\n" + tile).left.value
-      result shouldBe """Failure(Fail:15:3 ..."\n  [][][][")"""
+      val result = Tiles.parseStr(ruler + "00\n" + tile + "\n00\n" + tile).left.value
+      result shouldBe """Failure([Number should be 01, but was 00]:15:3 ..."\n  [][][][")"""
     }
   }
 }
