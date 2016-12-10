@@ -13,6 +13,8 @@ The program can also be used to generate [binary tile sets][video] from
     -t --tiles  Parse the text tile format file and produce a binary format
                 tile file.
 
+    -h --help   Print this help text.
+
 
 Examples
 --------
@@ -22,6 +24,8 @@ Examples
     java -jar ljd-asm16-x.x.x.jar -t main.tiles > tiles.bin
 
     java -jar ljd-asm16-x.x.x.jar --tiles main.tiles > tiles.bin
+
+    java -jar ljd-asm16-x.x.x.jar --help
 
 
 
