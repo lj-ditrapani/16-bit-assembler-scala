@@ -35,8 +35,13 @@ object Tiles {
       Start ~/ tile_set ~/ End
     )
     parseFile.parse(str) match {
-      case Parsed.Success(value, index) => Right(value)
-      case failure: Parsed.Failure => Left(failure.toString)
+      case Parsed.Success(value, index) =>
+        Right(value)
+      case failure: Parsed.Failure =>
+        val input = failure.extra.input
+        val Array(line, column) = input.repr.prettyIndex(input, failure.index).split(":")
+        val s = s"Failure parsing ASCII tile file occured at\nLine: $line\nColumn: $column\n"
+        Left(s + failure.msg)
     }
   }
 }

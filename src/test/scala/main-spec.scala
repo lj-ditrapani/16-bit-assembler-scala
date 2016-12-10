@@ -11,6 +11,16 @@ class MainSpec extends Spec with EitherValues {
       value shouldBe message
     }
 
+    def expectParseError(
+        result: Result,
+        line: Int,
+        column: Int,
+        error_message: String): Unit = {
+      val message = "Failure parsing ASCII tile file occured at\n" +
+        s"Line: $line\nColumn: $column\n$error_message"
+      expectError(result, message)
+    }
+
     @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
     def expectGood(result: Result): Seq[Byte] = {
       result shouldBe a[Good]
@@ -80,8 +90,8 @@ class MainSpec extends Spec with EitherValues {
           it("prints an error") {
             val args = Array("-t", "README.md")
             val result = Main.process(args)
-            val message = """Failure("  0 1 2 3 4 5 6 7\n":1:1 ..."Assembler ")"""
-            expectError(result, message)
+            val message = """"  0 1 2 3 4 5 6 7\n":1:1 ..."Assembler """"
+            expectParseError(result, 1, 1, message)
           }
         }
 

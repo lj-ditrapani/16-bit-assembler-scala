@@ -14,9 +14,18 @@ class TilesSpec extends Spec with EitherValues {
   }
 
   describe("parseStr") {
-    def errorMessage(expected: String, found: String, line: Int): String =
-      s"Failure([Number should be $expected, but was $found]:$line" +
-        """:3 ..."\n  [][][][")"""
+    def tileNumberErrorMessage(expected: String, found: String, line: Int): String = {
+      val s = s"[Number should be $expected, but was $found]:$line" +
+        """:3 ..."\n  [][][][""""
+      parseErrorMessage(line, 3, s)
+    }
+
+    def parseErrorMessage(
+        line: Int,
+        column: Int,
+        error_message: String): String =
+      "Failure parsing ASCII tile file occured at\n" +
+        s"Line: $line\nColumn: $column\n$error_message"
 
     it("passes if the string is well formed") {
       val stream : java.io.InputStream = getClass.getResourceAsStream("/built-in.tiles")
@@ -44,17 +53,17 @@ class TilesSpec extends Spec with EitherValues {
 
     it("fails if it can't match a pixel") {
       val result = Tiles.parseStr(ruler + "00\n" + "  [>").left.value
-      result shouldBe """Failure((pixel0 | pixel1):3:3 ..."[>")"""
+      result shouldBe parseErrorMessage(3, 3, """(pixel0 | pixel1):3:3 ..."[>"""")
     }
 
     it("fails if the first tile number is wrong") {
       val result = Tiles.parseStr(ruler + "01\n" + tile + "\n01").left.value
-      result shouldBe errorMessage("00", "01", 2)
+      result shouldBe tileNumberErrorMessage("00", "01", 2)
     }
 
     it("fails if the second tile number is wrong") {
       val result = Tiles.parseStr(ruler + "00\n" + tile + "\n00\n" + tile).left.value
-      result shouldBe errorMessage("01", "00", 15)
+      result shouldBe tileNumberErrorMessage("01", "00", 15)
     }
   }
 }
