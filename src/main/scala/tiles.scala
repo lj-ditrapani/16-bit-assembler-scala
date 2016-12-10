@@ -7,7 +7,7 @@ object Tiles {
     val tile_ruler = P("  0 1 2 3 4 5 6 7\n")
     val pixel0 = P("[]").map((x) => 0)
     val pixel1 = P("<>").map((x) => 1)
-    val pixel = P(pixel0 | pixel1)
+    val pixel = P(pixel0 | pixel1).opaque("Expected [] or <>")
     val tile_row = P("  " ~/ pixel.rep(exactly = 8)).map(Tile.row)
     val tile_num = {
       @SuppressWarnings(Array("org.wartremover.warts.Var"))

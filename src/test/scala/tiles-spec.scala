@@ -58,7 +58,13 @@ class TilesSpec extends Spec with EitherValues {
 
     it("fails if it can't match a pixel") {
       val result = Tiles.parseStr(ruler + "00\n" + "  [>").left.value
-      result shouldBe parseErrorMessage(3, 3, """(pixel0 | pixel1):3:3 ..."[>"""")
+      result shouldBe parseErrorMessage(3, 3, """Expected [] or <>:3:3 ..."[>"""")
+    }
+
+    it("fails if the first tile number is missing") {
+      val result = Tiles.parseStr(ruler + "<>").left.value
+      val message = """CharIn("0123456789ABCDEF"):2:1 ..."<>""""
+      result shouldBe parseErrorMessage(2, 1, message)
     }
 
     it("fails if the first tile number is wrong") {
