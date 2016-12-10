@@ -1,9 +1,7 @@
 package info.ditrapani.asm.tiles
 
-import info.ditrapani.asm
-
 object Tiles {
-  def parseStr(str: String): asm.Result = {
+  def parseStr(str: String): Either[String, Seq[Byte]] = {
     import fastparse.all._
 
     val tile_ruler = P("  0 1 2 3 4 5 6 7\n")
@@ -37,8 +35,8 @@ object Tiles {
       Start ~/ tile_set ~/ End
     )
     parseFile.parse(str) match {
-      case Parsed.Success(value, index) => asm.Good(value)
-      case x: Parsed.Failure => asm.Error(s"${x}")
+      case Parsed.Success(value, index) => Right(value)
+      case x: Parsed.Failure => Left(s"${x}")
     }
   }
 }
