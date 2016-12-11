@@ -40,10 +40,9 @@ object SignedNumber {
   }
 }
 
-sealed abstract class Number
-final case class Number16(value: Int) extends Number
-final case class Number8(value: Int) extends Number
-final case class Number4(value: Int) extends Number
+final case class Number16(value: Int)
+final case class Number8(value: Int)
+final case class Number4(value: Int)
 
 sealed abstract class FromSignedNumber[T](max_positive: Int, max_negative: Int) {
   def apply(n: Int): T
@@ -72,17 +71,17 @@ object Number8 extends FromSignedNumber[Number8](0xFF, 0x80)
 object Number4 extends FromSignedNumber[Number4](0xF, 0x8)
 
 object NumberParser {
-  val decimal_digit = P(CharIn('0' to '9'))
-  val hex_letters = P(CharIn('a' to 'f') | CharIn('A' to 'F'))
-  val hex_digit = P(decimal_digit | hex_letters)
-  val binary_digit = P(CharIn("01"))
-  val decimal = (("+" | "-").!.? ~ decimal_digit.! ~/ (decimal_digit | "_").rep.!)
+  private val decimal_digit = P(CharIn('0' to '9'))
+  private val hex_letters = P(CharIn('a' to 'f') | CharIn('A' to 'F'))
+  private val hex_digit = P(decimal_digit | hex_letters)
+  private val binary_digit = P(CharIn("01"))
+  private val decimal = (("+" | "-").!.? ~ decimal_digit.! ~/ (decimal_digit | "_").rep.!)
     .map(SignedNumber.fromDecimal)
-  val hex = P("$" ~/ hex_digit.! ~/ (hex_digit | "_").rep.!)
+  private val hex = P("$" ~/ hex_digit.! ~/ (hex_digit | "_").rep.!)
     .map(SignedNumber.fromHex)
-  val binary = P("%" ~/ binary_digit.! ~/ (binary_digit | "_").rep.!)
+  private val binary = P("%" ~/ binary_digit.! ~/ (binary_digit | "_").rep.!)
     .map(SignedNumber.fromBinary)
-  val number = (decimal | hex | binary)
+  private val number = (decimal | hex | binary)
 
   val number16bit = number.flatMap(Number16.fromSignedNumber(_))
   val number8bit = number.flatMap(Number8.fromSignedNumber(_))
