@@ -45,17 +45,19 @@ final case class Number16(value: Int) extends Number
 final case class Number8(value: Int) extends Number
 final case class Number4(value: Int) extends Number
 
-class FromSignedNumber[T](max_positive: Int, max_negative: Int, contructor: Int => T) {
+sealed abstract class FromSignedNumber[T](max_positive: Int, max_negative: Int) {
+  def apply(n: Int): T
+
   def fromSignedNumber(number: SignedNumber): Parser[T] =
     number.sign match {
       case Plus => (number.value > max_positive) match {
-        case false => Pass.map(_ => contructor(number.value))
+        case false => Pass.map(_ => apply(number.value))
         case true => Fail.opaque(
           s"Positive number is too large; max is ${max_positive}"
         )
       }
       case Minus => (number.value > max_negative) match {
-        case false => Pass.map(_ => contructor((~number.value + 1) & max_positive))
+        case false => Pass.map(_ => apply((~number.value + 1) & max_positive))
         case true => Fail.opaque(
           s"Negative number is too large; max is -${max_negative}"
         )
@@ -63,24 +65,11 @@ class FromSignedNumber[T](max_positive: Int, max_negative: Int, contructor: Int 
     }
 }
 
-sealed abstract class SignedNumberToNumber[T] {
-  val converter: FromSignedNumber[T]
+object Number16 extends FromSignedNumber[Number16](0xFFFF, 0x8000)
 
-  def fromSignedNumber(number: SignedNumber): Parser[T] =
-    converter.fromSignedNumber(number)
-}
+object Number8 extends FromSignedNumber[Number8](0xFF, 0x80)
 
-object Number16 extends SignedNumberToNumber[Number16] {
-  val converter = new FromSignedNumber(0xFFFF, 0x8000, Number16.apply _)
-}
-
-object Number8 extends SignedNumberToNumber[Number8] {
-  val converter = new FromSignedNumber(0xFF, 0x80, Number8.apply _)
-}
-
-object Number4 extends SignedNumberToNumber[Number4] {
-  val converter = new FromSignedNumber(0xF, 0x8, Number4.apply _)
-}
+object Number4 extends FromSignedNumber[Number4](0xF, 0x8)
 
 object NumberParser {
   val decimal_digit = P(CharIn('0' to '9'))
