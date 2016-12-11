@@ -7,7 +7,7 @@ class NumberParserSpec extends Spec {
     import fastparse.all._
     val number_parser: Parser[T]
 
-    def makeNumber(value: Int): T
+    protected def makeNumber(value: Int): T
 
     def runSuccessTests(num_type: String, tests: List[(String, Int)]): Unit = {
       for(test <- tests) {
@@ -47,17 +47,17 @@ class NumberParserSpec extends Spec {
 
   trait Number16Fixture extends Fixture[Number16] {
     val number_parser = NumberParser.number16bit
-    def makeNumber(value: Int) = Number16.apply(value)
+    protected def makeNumber(value: Int) = Number16.apply(value)
   }
 
   trait Number8Fixture extends Fixture[Number8] {
     val number_parser = NumberParser.number8bit
-    def makeNumber(value: Int) = Number8.apply(value)
+    protected def makeNumber(value: Int) = Number8.apply(value)
   }
 
   trait Number4Fixture extends Fixture[Number4] {
     val number_parser = NumberParser.number4bit
-    def makeNumber(value: Int) = Number4.apply(value)
+    protected def makeNumber(value: Int) = Number4.apply(value)
   }
 
   describe("16-bit numbers") { new Number16Fixture {

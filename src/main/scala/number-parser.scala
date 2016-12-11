@@ -20,22 +20,23 @@ object Sign {
 final case class SignedNumber(sign: Sign, value: Int)
 
 object SignedNumber {
-  def fromHex(tuple: (String, String)): SignedNumber = {
-    val (first_digit, digits) = tuple
-    val clean = first_digit + digits.filter(_ != '_')
-    SignedNumber(Plus, Integer.parseInt(clean, 16))
-  }
+  def fromHex(tuple: (String, String)): SignedNumber = make(tuple, 16)
 
   def fromDecimal(tuple: (Option[String], String, String)): SignedNumber = {
     val (sign_option, first_digit, digits) = tuple
-    val clean = first_digit + digits.filter(_ != '_')
-    SignedNumber(Sign.fromOption(sign_option), Integer.parseInt(clean))
+    make2(Sign.fromOption(sign_option), first_digit, digits, 10)
   }
 
-  def fromBinary(tuple: (String, String)): SignedNumber = {
+  def fromBinary(tuple: (String, String)): SignedNumber = make(tuple, 2)
+
+  private def make(tuple: (String, String), base: Int) = {
     val (first_digit, digits) = tuple
+    make2(Plus, first_digit, digits, base)
+  }
+
+  private def make2(sign: Sign, first_digit: String, digits: String, base: Int) = {
     val clean = first_digit + digits.filter(_ != '_')
-    SignedNumber(Plus, Integer.parseInt(clean, 2))
+    SignedNumber(sign, Integer.parseInt(clean, base))
   }
 }
 
@@ -44,58 +45,41 @@ final case class Number16(value: Int) extends Number
 final case class Number8(value: Int) extends Number
 final case class Number4(value: Int) extends Number
 
-object Number16 {
-  def fromSignedNumber(number: SignedNumber): Parser[Number16] =
+class FromSignedNumber[T](max_positive: Int, max_negative: Int, contructor: Int => T) {
+  def fromSignedNumber(number: SignedNumber): Parser[T] =
     number.sign match {
-      case Plus => (number.value > 0xFFFF) match {
-        case false => Pass.map(_ => Number16(number.value))
+      case Plus => (number.value > max_positive) match {
+        case false => Pass.map(_ => contructor(number.value))
         case true => Fail.opaque(
-          s"Positive decimal number is too large; max is ${0xFFFF}"
+          s"Positive number is too large; max is ${max_positive}"
         )
       }
-      case Minus => (number.value > 32 * 1024) match {
-        case false => Pass.map(_ => Number16((~number.value + 1) & 0xFFFF))
+      case Minus => (number.value > max_negative) match {
+        case false => Pass.map(_ => contructor((~number.value + 1) & max_positive))
         case true => Fail.opaque(
-          s"Negative number is too large; max is -${0x8000}"
+          s"Negative number is too large; max is -${max_negative}"
         )
       }
     }
 }
 
-object Number8 {
-  def fromSignedNumber(number: SignedNumber): Parser[Number8] =
-    number.sign match {
-      case Plus => (number.value > 0xFF) match {
-        case false => Pass.map(_ => Number8(number.value))
-        case true => Fail.opaque(
-          s"Positive decimal number is too large; max is ${0xFF}"
-        )
-      }
-      case Minus => (number.value > 0x80) match {
-        case false => Pass.map(_ => Number8((~number.value + 1) & 0xFF))
-        case true => Fail.opaque(
-          s"Negative number is too large; max is -${0x80}"
-        )
-      }
-    }
+sealed abstract class SignedNumberToNumber[T] {
+  val converter: FromSignedNumber[T]
+
+  def fromSignedNumber(number: SignedNumber): Parser[T] =
+    converter.fromSignedNumber(number)
 }
 
-object Number4 {
-  def fromSignedNumber(number: SignedNumber): Parser[Number4] =
-    number.sign match {
-      case Plus => (number.value > 0xF) match {
-        case false => Pass.map(_ => Number4(number.value))
-        case true => Fail.opaque(
-          s"Positive decimal number is too large; max is ${0xF}"
-        )
-      }
-      case Minus => (number.value > 0x8) match {
-        case false => Pass.map(_ => Number4((~number.value + 1) & 0xF))
-        case true => Fail.opaque(
-          s"Negative number is too large; max is -${0x8}"
-        )
-      }
-    }
+object Number16 extends SignedNumberToNumber[Number16] {
+  val converter = new FromSignedNumber(0xFFFF, 0x8000, Number16.apply _)
+}
+
+object Number8 extends SignedNumberToNumber[Number8] {
+  val converter = new FromSignedNumber(0xFF, 0x80, Number8.apply _)
+}
+
+object Number4 extends SignedNumberToNumber[Number4] {
+  val converter = new FromSignedNumber(0xF, 0x8, Number4.apply _)
 }
 
 object NumberParser {
