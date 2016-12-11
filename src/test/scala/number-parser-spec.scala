@@ -53,7 +53,10 @@ class NumberParserSpec extends Spec {
         ("32768", 0x8000),
         ("-1", 0xFFFF),
         ("-32768", 0x8000),
-        ("-123", 0xFF85)
+        ("-123", 0xFF85),
+        ("007", 7),
+        ("+007", 7),
+        ("-007", 0xFFF9)
       )
       runSuccessTests("decimal", decimal_pass_tests)
 
