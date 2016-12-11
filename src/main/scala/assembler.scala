@@ -66,18 +66,3 @@ object Assembler {
 
   final case class SymbolEntry(index: Int, key: String, value: SymbolValue)
 }
-
-object NumberParser {
-  import fastparse.all._
-
-  // validate number?  .filter  but concerned about error message
-
-  val decimal_digit = P(CharIn('0' to '9'))
-  val hex_letters = P(CharIn('a' to 'f') | CharIn('A' to 'F'))
-  val hex_digit = P(decimal_digit | hex_letters)
-  val binary_digit = P(CharIn("01"))
-  val decimal = (("+" | "-").? ~ decimal_digit ~/ (decimal_digit | "_").rep)
-  val hex = P("$" ~/ hex_digit ~/ (hex_digit | "_").rep)
-  val binary = P("%" ~/ binary_digit ~/ (binary_digit | "_").rep)
-  val number = (decimal | hex | binary)
-}
