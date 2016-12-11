@@ -6,7 +6,8 @@ sealed abstract class Sign
 final object Plus extends Sign
 final object Minus extends Sign
 object Sign {
-  def fromOption(o: Option[String]) = o match {
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+  def fromOption(o: Option[String]): Sign = o match {
     case None => Plus
     case Some(s) => s match {
       case "+" => Plus
@@ -19,8 +20,11 @@ object Sign {
 final case class SignedNumber(sign: Sign, value: Int)
 
 object SignedNumber {
-  def fromHex(tuple: (String, String)): SignedNumber =
-    SignedNumber(Plus, 42)
+  def fromHex(tuple: (String, String)): SignedNumber = {
+    val (first_digit, digits) = tuple
+    val clean = first_digit + digits.filter(_ != '_')
+    SignedNumber(Plus, Integer.parseInt(clean, 16))
+  }
 
   def fromDecimal(tuple: (Option[String], String, String)): SignedNumber = {
     val (sign_option, first_digit, digits) = tuple
@@ -28,8 +32,11 @@ object SignedNumber {
     SignedNumber(Sign.fromOption(sign_option), Integer.parseInt(clean))
   }
 
-  def fromBinary(tuple: (String, String)): SignedNumber =
-    SignedNumber(Plus, 42)
+  def fromBinary(tuple: (String, String)): SignedNumber = {
+    val (first_digit, digits) = tuple
+    val clean = first_digit + digits.filter(_ != '_')
+    SignedNumber(Plus, Integer.parseInt(clean, 2))
+  }
 }
 
 sealed abstract class Number

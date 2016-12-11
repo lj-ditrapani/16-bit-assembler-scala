@@ -78,16 +78,36 @@ class NumberParserSpec extends Spec {
         ("$C6_A3", 0xC6A3)
       )
       runSuccessTests("hexadecimal", hex_tests)
+
+      val hex_fail_tests = List(
+        "$10000",
+        "$1_0000",
+        "$_5",
+        "$5G"
+      )
+      runFailTests("hexadecimal", hex_fail_tests)
     }
 
     describe("binary numbers") {
       val bin_tests = List(
+        ("%0", 0),
+        ("%1", 1),
+        ("%10", 2),
         ("%1111_1111", 255),
         ("%1010_0101", 0xA5),
         ("%0000_0000", 0x00),
-        ("%1100_0110_1010_0011", 0xC6A3)
+        ("%1100_0110_1010_0011", 0xC6A3),
+        ("%0000_0000_0000_0000", 0),
+        ("%1111_1111_1111_1111", 0xFFFF)
       )
       runSuccessTests("binary", bin_tests)
+
+      val bin_fail_tests = List(
+        "%1_0000_0000_0000_0000",
+        "%12",
+        "%1A"
+      )
+      runFailTests("binary", bin_fail_tests)
     }
   }
 }
