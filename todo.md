@@ -2,6 +2,10 @@
     - 1) pass into domain objects
     - 2) Fill out symbol table
     - 3) Fill in symbols & generate binary
+- 3 packages (match up with passes)
+    - 1) parser (converts text to domain objects)
+    - 2) symbol table
+    - 3) binary generator
 - symbols section
     - symbols table
     - dissalow defining predefined symbols (later pass)
