@@ -1,7 +1,10 @@
+- 3 passes
+    - 1) pass into domain objects
+    - 2) Fill out symbol table
+    - 3) Fill in symbols & generate binary
 - symbols section
-    - predefined symbols
     - symbols table
-    - dissalow defining predefined symbols
+    - dissalow defining predefined symbols (later pass)
     - Entry value:  Not Either[String, Number16]; just Number16?
 - main assembler parser
     - Can flatMap over classes that inject state and return new parsers
