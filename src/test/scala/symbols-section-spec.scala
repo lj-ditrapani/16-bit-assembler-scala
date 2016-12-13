@@ -1,12 +1,25 @@
-package info.ditrapani.asm
+package info.ditrapani.asm.symbols
 
 import scala.collection.mutable.ArrayBuffer
-import info.ditrapani.asm.SymbolsSection.SymbolEntry
+import info.ditrapani.asm.number.Number16
+import info.ditrapani.asm.Spec
+import SymbolsSection.SymbolEntry
 import fastparse.all._
 
 class SymbolsSectionSpec extends Spec {
-  describe("symbols_section") {
+  describe("predefined_symbols") {
+    it("is defined") {
+      import SymbolsSection.predefined_symbols
+      predefined_symbols.size shouldBe 16 + 6 + 5
+      predefined_symbols("R0").value shouldBe 0
+      predefined_symbols("R15").value shouldBe 15
+      predefined_symbols("RA").value shouldBe 10
+      predefined_symbols("RF").value shouldBe 15
+      predefined_symbols("gamepad").value shouldBe 0xFFFD
+    }
+  }
 
+  describe("symbols_section") {
     val parser = P(Start ~/ SymbolsSection.symbols_section ~/ End)
 
     it("can be empty") {
@@ -17,6 +30,7 @@ class SymbolsSectionSpec extends Spec {
     }
 
     it("succeeds even if it does not contain any SymbolEntrys") {
+      // scalastyle:off whitespace.end.of.line
       val result = parser.parse(
         """.symbols
           |# A comment
@@ -24,12 +38,14 @@ class SymbolsSectionSpec extends Spec {
           |  
           |# Empty lines & lines with spaces
           |.end-symbols""".stripMargin)
+      // scalastyle:on whitespace.end.of.line
       @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
       val value = result.asInstanceOf[Parsed.Success[ArrayBuffer[SymbolEntry]]].value
       value shouldBe ArrayBuffer()
     }
 
-    ignore("parses and returns SymbolEntrys") {
+    it("parses and returns SymbolEntrys") {
+      // scalastyle:off whitespace.end.of.line
       val result = parser.parse(
         """.symbols
           |
@@ -46,9 +62,19 @@ class SymbolsSectionSpec extends Spec {
           |
           |  
           |.end-symbols""".stripMargin)
+      // scalastyle:on whitespace.end.of.line
       @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
       val value = result.asInstanceOf[Parsed.Success[ArrayBuffer[SymbolEntry]]].value
-      value shouldBe ArrayBuffer()
+      val entries = List(
+        (22, "size", 16),
+        (30, "secret-to-life", 42),
+        (86, "LOOP", 0xF087),
+        (112, "MY_VAR", 0x0F0F),
+        (125, "neg_", 0xFF85)
+      ).map {
+        case (index, name, value) => SymbolEntry(index, name, Number16(value))
+      }
+      value shouldBe entries.to[ArrayBuffer]
     }
   }
 }
