@@ -19,9 +19,9 @@ object Assembler {
   val file = P(
     Start ~/ noise ~/
     symbols_section ~/ noise ~/
-    data_section ~/ noise ~/
-    video_section ~/ noise ~/
     program_section ~/ noise ~/
+    video_section ~/ noise ~/
+    data_section ~/ noise ~/
     End
   )
   */
