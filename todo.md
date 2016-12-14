@@ -1,6 +1,10 @@
 - 3 passes
-    - 1) pass into domain objects
-    - 2) Fill out symbol table
+    - 1) parse string into domain objects
+        - Symbols:      Seq of symbol entries
+        - Program ROM:  Seq of Either[Instruction, Label]
+        - Video ROM:    (Option[Seq[Color]], Option[Seq[Bytes]])
+        - Data RAM:     Seq[Command]
+    - 2) Computer addresses & fill out symbol table
     - 3) Fill in symbols & generate binary
 - 3 packages (match up with passes)
     - 1) parser (converts text to domain objects)
@@ -9,7 +13,6 @@
 - symbols section
     - symbols table
     - dissalow defining predefined symbols (later pass)
-    - Entry value:  Not Either[String, Number16]; just Number16?
 - main assembler parser
     - Can flatMap over classes that inject state and return new parsers
       to allow immutable symbol map & line number propagation.
