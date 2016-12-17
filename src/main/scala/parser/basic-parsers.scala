@@ -1,4 +1,4 @@
-package info.ditrapani.asm
+package info.ditrapani.asm.parser
 
 object BasicParsers {
   import fastparse.all._

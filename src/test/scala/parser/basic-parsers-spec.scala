@@ -1,4 +1,6 @@
-package info.ditrapani.asm
+package info.ditrapani.asm.parser
+
+import info.ditrapani.asm.Spec
 
 class BasicParsersSpec extends Spec {
   describe("symbol") {

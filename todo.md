@@ -1,3 +1,4 @@
+- parsedResult2Either: refactor to use it for both assembler & tile creator
 - 3 passes
     - 1) parse string into domain objects. Outputs for each section:
         - Symbols:      Seq of symbol entries

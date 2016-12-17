@@ -1,24 +1,12 @@
-package info.ditrapani.asm.symbols
+package info.ditrapani.asm.parser.symbols
 
 import scala.collection.mutable.ArrayBuffer
-import info.ditrapani.asm.number.Number16
+import info.ditrapani.asm.parser.number.Number16
 import info.ditrapani.asm.Spec
 import SymbolsSection.SymbolEntry
 import fastparse.all._
 
 class SymbolsSectionSpec extends Spec {
-  describe("predefined_symbols") {
-    it("is defined") {
-      import SymbolsSection.predefined_symbols
-      predefined_symbols.size shouldBe 16 + 6 + 5
-      predefined_symbols("R0").value shouldBe 0
-      predefined_symbols("R15").value shouldBe 15
-      predefined_symbols("RA").value shouldBe 10
-      predefined_symbols("RF").value shouldBe 15
-      predefined_symbols("gamepad").value shouldBe 0xFFFD
-    }
-  }
-
   describe("symbols_section") {
     val parser = P(Start ~/ SymbolsSection.symbols_section ~/ End)
 

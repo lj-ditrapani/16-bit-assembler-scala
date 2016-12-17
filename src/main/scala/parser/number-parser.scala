@@ -1,4 +1,4 @@
-package info.ditrapani.asm.number
+package info.ditrapani.asm.parser.number
 
 import fastparse.all._
 
