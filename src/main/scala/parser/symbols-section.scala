@@ -14,6 +14,6 @@ object SymbolsSection {
   val symbols_section = P(
     ".symbols\n" ~/ noise ~/ symbol_entry.rep ~/ ".end-symbols" ~/ tail_noise
   )
-
-  final case class SymbolEntry(index: Int, key: String, value: Number16)
 }
+
+final case class SymbolEntry(index: Int, key: String, value: Number16)

@@ -1,9 +1,10 @@
 package info.ditrapani.asm.parser
 
 import info.ditrapani.asm.Utils
-import fastparse.all._
 
 object AsmParser {
+  import fastparse.all._
+
   /*
   val data_entry = P(
     Index ~ "word" ~/ spaces ~/ symbol ~/ spaces ~/ number16bit ~/ tail_noise
@@ -19,7 +20,7 @@ object AsmParser {
   )
   val file = P(
     Start ~/ noise ~/
-    symbols_section ~/ noise ~/
+    symbols.SymbolsSection.symbols_section ~/ noise ~/
     program_section ~/ noise ~/
     video_section ~/ noise ~/
     data_section ~/ noise ~/
@@ -33,6 +34,7 @@ object AsmParser {
       Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
     )
     def parseFile(x: Unit): Either[String, Seq[Byte]] = {
+      symbols.SymbolsSection.symbols_section.parse(text)
       // Utils.parsedResult2Either[Seq[Byte]]("assembly", file.parse(text))
       Right(List(65.toByte, 66.toByte, 10.toByte))
     }

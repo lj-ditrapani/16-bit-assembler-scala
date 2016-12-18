@@ -3,7 +3,6 @@ package info.ditrapani.asm.parser.symbols
 import scala.collection.mutable.ArrayBuffer
 import info.ditrapani.asm.parser.number.Number16
 import info.ditrapani.asm.Spec
-import SymbolsSection.SymbolEntry
 import fastparse.all._
 
 class SymbolsSectionSpec extends Spec {
