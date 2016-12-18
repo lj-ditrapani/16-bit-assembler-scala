@@ -5,6 +5,14 @@ import info.ditrapani.asm.Utils
 object AsmParser {
   import fastparse.all._
 
+  type ParserResult = Either[
+    String,
+    (
+      Seq[symbols.SymbolEntry],
+      Seq[program.Command]
+    )
+  ]
+
   /*
   val data_entry = P(
     Index ~ "word" ~/ spaces ~/ symbol ~/ spaces ~/ number16bit ~/ tail_noise
@@ -28,15 +36,15 @@ object AsmParser {
   )
   */
 
-  def parse_asm(text: String): Either[String, Seq[Byte]] = {
-
+  def parseAsm(text: String): ParserResult = {
     val valid_cahrs = P(
       Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
     )
-    def parseFile(x: Unit): Either[String, Seq[Byte]] = {
-      symbols.SymbolsSection.symbols_section.parse(text)
+    def parseFile(x: Unit): ParserResult = {
       // Utils.parsedResult2Either[Seq[Byte]]("assembly", file.parse(text))
-      Right(List(65.toByte, 66.toByte, 10.toByte))
+      val parsed_symbols = symbols.SymbolsSection.symbols_section.parse(text)
+      Utils.parsedResult2Either[Seq[symbols.SymbolEntry]]("assembly", parsed_symbols)
+        .right.map((symbol_seq) => (symbol_seq, Seq[program.Command]()))
     }
 
     val result = valid_cahrs.parse(text)
