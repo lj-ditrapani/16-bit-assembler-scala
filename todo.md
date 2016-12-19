@@ -1,3 +1,5 @@
+- program_section is mandatory
+- Make symbols_section, video_section, & data_section optional
 - parsedResult2Either: refactor to use it for both assembler & tile creator
 - 3 passes
     - 1) parse string into domain objects. Outputs for each section:
