@@ -14,19 +14,12 @@ object AsmParser {
   ]
 
   /*
-  val data_entry = P(
-    Index ~ "word" ~/ spaces ~/ symbol ~/ spaces ~/ number16bit ~/ tail_noise
-  )
-  val data_section_line = P(" ".rep ~ (comment | data_entry).? ~ "\n")
-  val data_section = P(
-    ".data-ram\n" ~/ data_section_line.rep ~/ ".end-data-ram" ~/ tail_noise
-  )
   val file = P(
     Start ~/ noise ~/
     symbols.SymbolsSection.symbols_section ~/ noise ~/
-    program_section ~/ noise ~/
-    video_section ~/ noise ~/
-    data_section ~/ noise ~/
+    program.ProgramSection.program_section ~/ noise ~/
+    video.VideoSection.video_section ~/ noise ~/
+    data.DataSection.data_section ~/ noise ~/
     End
   )
   */

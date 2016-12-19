@@ -11,7 +11,7 @@ object ProgramSection {
   import info.ditrapani.asm.parser.BasicParsers._
 
   val program_entry = P(
-    Index ~ spaces ~ symbol.rep(min = 2, max = 3, sep = spaces) ~/
+    optional_spaces ~ Index ~ symbol.rep(min = 2, max = 3, sep = spaces) ~/
     tail_noise ~/ "\n" ~/ noise
   )
   val program_section = P(
