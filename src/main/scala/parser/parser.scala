@@ -3,7 +3,6 @@ package info.ditrapani.asm.parser
 import info.ditrapani.asm.Utils
 
 object AsmParser {
-  import fastparse.all._
 
   type ParserResult = Either[
     String,
@@ -13,18 +12,22 @@ object AsmParser {
     )
   ]
 
-  /*
-  val file = P(
-    Start ~/ noise ~/
-    symbols.SymbolsSection.symbols_section ~/ noise ~/
-    program.ProgramSection.program_section ~/ noise ~/
-    video.VideoSection.video_section ~/ noise ~/
-    data.DataSection.data_section ~/ noise ~/
-    End
-  )
-  */
+  val file = {
+    import fastparse.all._
+    import info.ditrapani.asm.parser.BasicParsers._
+    P(
+      Start ~/ noise ~/
+      symbols.SymbolsSection.symbols_section ~/ noise ~/
+      program.ProgramSection.program_section ~/ noise ~/
+      video.VideoSection.video_section ~/ noise ~/
+      data.DataSection.data_section ~/ noise ~/
+      End
+    )
+  }
 
   def parseAsm(text: String): ParserResult = {
+    import fastparse.all._
+
     val valid_cahrs = P(
       Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
     )
