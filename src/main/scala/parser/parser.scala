@@ -21,11 +21,6 @@ object AsmParser {
   val data_section = P(
     ".data-ram\n" ~/ data_section_line.rep ~/ ".end-data-ram" ~/ tail_noise
   )
-  val program_entry = P(Index ~ symbol.rep(3, sep = spaces) ~/ tail_noise)
-  val program_section_line = P(" ".rep ~ (comment | program_entry).? ~ "\n")
-  val program_section = P(
-    ".program-rom\n" ~/ program_section_line.rep ~/ ".end-program-rom" ~/ tail_noise
-  )
   val file = P(
     Start ~/ noise ~/
     symbols.SymbolsSection.symbols_section ~/ noise ~/
