@@ -3,6 +3,7 @@ package info.ditrapani.asm.parser.program
 sealed abstract class Command
 
 final class Instruction extends Command
+// actually want RealInstruction & PseudoInstruction subclasses
 
 final class Label extends Command
 

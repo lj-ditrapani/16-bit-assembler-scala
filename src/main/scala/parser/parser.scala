@@ -1,16 +1,12 @@
 package info.ditrapani.asm.parser
 
-import info.ditrapani.asm.Utils
-
 object AsmParser {
-
-  type ParserResult = Either[
-    String,
-    (
-      Seq[symbols.SymbolEntry],
-      Seq[program.Command]
-    )
-  ]
+  type ParserResultTuple = (
+    Seq[symbols.SymbolEntry],
+    Seq[program.Command],
+    Seq[data.Command]
+  )
+  type RawParserResult = Either[String, ParserResultTuple]
 
   val file = {
     import fastparse.all._
@@ -31,14 +27,34 @@ object AsmParser {
     val valid_cahrs = P(
       Start ~/ ("\n" | CharIn('\u0020' to '\u007E')).rep ~/ End
     )
-    def parseFile(x: Unit): ParserResult = {
-      // Utils.parsedResult2Either[Seq[Byte]]("assembly", file.parse(text))
-      val parsed_symbols = symbols.SymbolsSection.symbols_section.parse(text)
-      Utils.parsedResult2Either[Seq[symbols.SymbolEntry]]("assembly", parsed_symbols)
-        .right.map((symbol_seq) => (symbol_seq, Seq[program.Command]()))
+
+    val result = valid_cahrs.parse(text) match {
+      case Parsed.Success(value, index) => file.parse(text)
+      case failure: Parsed.Failure => failure
     }
 
-    val result = valid_cahrs.parse(text)
-    Utils.parsedResult2Either[Unit]("assembly", result).flatMap(parseFile)
+    result match {
+      case Parsed.Success(value, index) =>
+        val (symbol_seq, program_commands, data_commands) = value
+        GoodParserResult(symbol_seq, Seq[program.Command](), Seq[data.Command]())
+      case failure: Parsed.Failure =>
+        // Utils.parsedFailure2String(failure)
+        val file_type = "assembly"
+        val input = failure.extra.input
+        val Array(line, column) = input.repr.prettyIndex(input, failure.index).split(":")
+        val s = s"Failure parsing $file_type file occured at\n" +
+          s"Line: $line\nColumn: $column\n"
+        BadParserResult(s + failure.msg)
+    }
   }
 }
+
+sealed abstract class ParserResult
+
+final case class BadParserResult(message: String) extends ParserResult
+
+final case class GoodParserResult(
+    symbol_entries: Seq[symbols.SymbolEntry],
+    program_commands: Seq[program.Command],
+    data_commands: Seq[data.Command]
+) extends ParserResult

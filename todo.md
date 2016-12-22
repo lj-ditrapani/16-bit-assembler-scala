@@ -1,10 +1,12 @@
 - program_section is mandatory
 - Make symbols_section, video_section, & data_section optional
-- parsedResult2Either: refactor to use it for both assembler & tile creator
+- parsedResult2Either:
+    - move method to tile creator (only place needed), but
+    - factor out `parsed.Failed to string` method and keep in Utils
 - 3 passes
     - 1) parse string into domain objects. Outputs for each section:
         - Symbols:      Seq of symbol entries
-        - Program ROM:  Seq of Either[Instruction, Label]
+        - Program ROM:  Seq of program.Command
         - Video ROM:    (Option[Seq[NamedColor]], Option[Seq[Bytes]])
         - Data RAM:     Seq[TaggedCommand]
     - 2) Computer addresses & fill out symbol table

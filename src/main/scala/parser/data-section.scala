@@ -14,3 +14,5 @@ object DataSection {
     ".data-ram\n" ~/ noise ~/ data_entry.rep ~/ ".end-data-ram" ~/ tail_noise
   )
 }
+
+sealed abstract class Command
