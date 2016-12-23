@@ -4,15 +4,12 @@ import info.ditrapani.asm.parser.AsmParser
 
 object Assembler {
   def assemble(text: String): Either[String, Seq[Byte]] = {
-    // parse
-    // val eitherParserdResult = AsmParser.parseAsm(text) match {
-    AsmParser.parseAsm(text) match {
-      case p: parser.GoodParserResult => Right(List(65.toByte, 66.toByte, 10.toByte))
-      case parser.BadParserResult(message) => Left(message)
+    val parserResult = AsmParser.parseAsm(text)
+    val symbolResults = symboltable.SymbolTable.fillSymbols(parserResult)
+    val binaryResult = binary.BinaryGenerator.generate(symbolResults)
+    binaryResult match {
+      case binary.GoodBinaryResult => Right(List(65.toByte, 66.toByte, 10.toByte))
+      case binary.BadBinaryResult(message) => Left(message)
     }
-    // fill out symbol table
-    // val eitherSymbolResults = symbols.fillSymbols(eitherParserdResult)
-    // generate binary
-    // generateBinary(eitherSymbolResults)
   }
 }

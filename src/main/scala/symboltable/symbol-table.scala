@@ -1,6 +1,9 @@
 package info.ditrapani.asm.symboltable
 
 import info.ditrapani.asm.parser.number.Number16
+import info.ditrapani.asm.parser.{
+  ParserResult, GoodParserResult, BadParserResult
+}
 
 object SymbolTable {
   val predefined_symbols = {
@@ -20,4 +23,13 @@ object SymbolTable {
     val all_pairs = number_registers ++ letter_registers ++ others
     Map(all_pairs: _*)
   }
+
+  def fillSymbols(parserResult: ParserResult): SymbolResults = parserResult match {
+    case GoodParserResult(s, p, d) => GoodSymbolResults
+    case BadParserResult(message) => BadSymbolResults(message)
+  }
 }
+
+sealed abstract class SymbolResults
+final case class BadSymbolResults(message: String) extends SymbolResults
+final object GoodSymbolResults extends SymbolResults
