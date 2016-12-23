@@ -1,5 +1,7 @@
 package info.ditrapani.asm.tiles
 
+import info.ditrapani.asm.Utils
+
 object Tiles {
   def parseStr(str: String): Either[String, Seq[Byte]] = {
     import fastparse.all._
@@ -34,16 +36,7 @@ object Tiles {
     val parseFile = P(
       Start ~/ tile_set ~/ End
     )
-    parseFile.parse(str) match {
-      case Parsed.Success(value, index) =>
-        Right(value)
-      case failure: Parsed.Failure =>
-        val input = failure.extra.input
-        val Array(line, column) = input.repr.prettyIndex(input, failure.index).split(":")
-        val s = "Failure parsing ASCII tile file occured at\n" +
-          s"Line: $line\nColumn: $column\n"
-        Left(s + failure.msg)
-    }
+    Utils.parsedResult2Either("ASCII tile", parseFile.parse(str))
   }
 }
 

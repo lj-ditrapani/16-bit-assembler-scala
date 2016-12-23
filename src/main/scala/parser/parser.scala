@@ -1,5 +1,7 @@
 package info.ditrapani.asm.parser
 
+import info.ditrapani.asm.Utils
+
 object AsmParser {
   type ParserResultTuple = (
     Seq[symbols.SymbolEntry],
@@ -33,19 +35,10 @@ object AsmParser {
       case failure: Parsed.Failure => failure
     }
 
-    result match {
-      case Parsed.Success(value, index) =>
-        val (symbol_seq, program_commands, data_commands) = value
-        Right(ParserResult(symbol_seq, Seq[program.Command](), Seq[data.Command]()))
-      case failure: Parsed.Failure =>
-        // Utils.parsedFailure2String(failure)
-        val file_type = "assembly"
-        val input = failure.extra.input
-        val Array(line, column) = input.repr.prettyIndex(input, failure.index).split(":")
-        val s = s"Failure parsing $file_type file occured at\n" +
-          s"Line: $line\nColumn: $column\n"
-        Left(s + failure.msg)
-    }
+    Utils.parsedResult2Either("assembly", result).right.map((value) => {
+      val (symbol_seq, program_commands, data_commands) = value
+      ParserResult(symbol_seq, Seq[program.Command](), Seq[data.Command]())
+    })
   }
 }
 

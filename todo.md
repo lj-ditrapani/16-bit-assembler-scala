@@ -1,8 +1,5 @@
 - program_section is mandatory
 - Make symbols_section, video_section, & data_section optional
-- parsedResult2Either:
-    - move method to tile creator (only place needed), but
-    - factor out `parsed.Failed to string` method and keep in Utils
 - 3 passes
     - 1) parse string into domain objects. Outputs for each section:
         - Symbols:      Seq of symbol entries
