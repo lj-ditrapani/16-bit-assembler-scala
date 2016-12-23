@@ -1,14 +1,10 @@
 package info.ditrapani.asm.binary
 
-import info.ditrapani.asm.symboltable.{SymbolResults, GoodSymbolResults, BadSymbolResults}
+import info.ditrapani.asm.symboltable.SymbolResults
 
 object BinaryGenerator {
-  def generate(symbolResults: SymbolResults): BinaryResult = symbolResults match {
-    case GoodSymbolResults => GoodBinaryResult
-    case BadSymbolResults(message) => BadBinaryResult(message)
-  }
+  def generate(symbolResults: SymbolResults): Either[String, BinaryResult] =
+    Right(BinaryResult())
 }
 
-sealed abstract class BinaryResult
-final case class BadBinaryResult(message: String) extends BinaryResult
-final object GoodBinaryResult extends BinaryResult
+final case class BinaryResult()

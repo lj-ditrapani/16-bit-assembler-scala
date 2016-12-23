@@ -21,7 +21,7 @@ object AsmParser {
     )
   }
 
-  def parseAsm(text: String): ParserResult = {
+  def parseAsm(text: String): Either[String, ParserResult] = {
     import fastparse.all._
 
     val valid_cahrs = P(
@@ -36,7 +36,7 @@ object AsmParser {
     result match {
       case Parsed.Success(value, index) =>
         val (symbol_seq, program_commands, data_commands) = value
-        GoodParserResult(symbol_seq, Seq[program.Command](), Seq[data.Command]())
+        Right(ParserResult(symbol_seq, Seq[program.Command](), Seq[data.Command]()))
       case failure: Parsed.Failure =>
         // Utils.parsedFailure2String(failure)
         val file_type = "assembly"
@@ -44,17 +44,13 @@ object AsmParser {
         val Array(line, column) = input.repr.prettyIndex(input, failure.index).split(":")
         val s = s"Failure parsing $file_type file occured at\n" +
           s"Line: $line\nColumn: $column\n"
-        BadParserResult(s + failure.msg)
+        Left(s + failure.msg)
     }
   }
 }
 
-sealed abstract class ParserResult
-
-final case class BadParserResult(message: String) extends ParserResult
-
-final case class GoodParserResult(
+final case class ParserResult(
     symbol_entries: Seq[symbols.SymbolEntry],
     program_commands: Seq[program.Command],
     data_commands: Seq[data.Command]
-) extends ParserResult
+)
