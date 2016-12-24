@@ -2,6 +2,7 @@ package info.ditrapani.asm.symboltable
 
 import info.ditrapani.asm.parser.number.Number16
 import info.ditrapani.asm.parser.ParserResult
+import info.ditrapani.asm.parser.program.Instruction
 
 object SymbolTable {
   val predefined_symbols = {
@@ -22,8 +23,10 @@ object SymbolTable {
     Map(all_pairs: _*)
   }
 
-  def fillSymbols(parserResult: ParserResult): Either[String, SymbolResults] =
-    Right(SymbolResults())
+  def fillSymbols(parserResult: ParserResult): Either[String, SymbolResults] = {
+    val instructions = parserResult.program_commands.collect { case i: Instruction => i }
+    Right(SymbolResults(instructions))
+  }
 }
 
-final case class SymbolResults()
+final case class SymbolResults(instructions: Seq[Instruction])
