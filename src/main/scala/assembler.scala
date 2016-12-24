@@ -7,6 +7,6 @@ object Assembler {
     AsmParser.parseAsm(text)
       .flatMap(symboltable.SymbolTable.fillSymbols)
       .flatMap(binary.BinaryGenerator.generate)
-      .map(x => List(65.toByte, 66.toByte, 10.toByte))
+      .map(binaryResult => binaryResult.bytes)
   }
 }
