@@ -37,7 +37,7 @@ object AsmParser {
 
     Utils.parsedResult2Either("assembly", result).right.map((value) => {
       val (symbol_seq, program_commands, data_commands) = value
-      ParserResult(symbol_seq, Seq[program.Command](), Seq[data.Command]())
+      ParserResult(symbol_seq, program_commands, Seq[data.Command]())
     })
   }
 }

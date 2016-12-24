@@ -4,6 +4,7 @@
   within groups of instructions with identical structure.
 - program_section is mandatory
 - Make symbols_section, video_section, & data_section optional
+- Update spec to have optional sections
 - 3 passes
     - 1) parse string into domain objects. Outputs for each section:
         - Symbols:      Seq of symbol entries
