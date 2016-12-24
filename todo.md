@@ -1,3 +1,7 @@
+- Flesh out assembly with goal of assembling simple adding program:
+  no symbols, no video or data section.  Produce a working binary from text.
+- Refactor .program-rom section.  Use superclass to remove repetition
+  within groups of instructions with identical structure.
 - program_section is mandatory
 - Make symbols_section, video_section, & data_section optional
 - 3 passes
@@ -26,7 +30,7 @@
     - 3) binary generator
 - symbols section
     - symbols table
-    - dissalow defining predefined symbols (later pass)
+    - disallow defining predefined symbols (later pass)
 - main assembler parser
     - Can flatMap over classes that inject state and return new parsers
       to allow immutable symbol map & line number propagation.
