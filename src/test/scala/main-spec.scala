@@ -54,7 +54,12 @@ class MainSpec extends Spec with EitherValues {
       }
 
       describe("arg is a file") {
-        it("assembles the file into a binary")(pending)
+        it("assembles the file into a binary") {
+          val good_file = "src/test/resources/super-basic-test.asm"
+          val args = Array(good_file)
+          val result = Main.process(args)
+          result shouldBe Good(List('A', 'B', '\n').map(_.toByte))
+        }
       }
 
       describe("arg is neither a file nor -h nor --help") {
