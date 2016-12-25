@@ -1,6 +1,7 @@
 package info.ditrapani.asm
 
 import org.scalatest.EitherValues
+import scala.collection.mutable.ArrayBuffer
 
 class MainSpec extends Spec with EitherValues {
   describe("process") {
@@ -58,7 +59,17 @@ class MainSpec extends Spec with EitherValues {
           val good_file = "src/test/resources/super-basic-test.asm"
           val args = Array(good_file)
           val result = Main.process(args)
-          result shouldBe Good(List('A', 'B', '\n').map(_.toByte))
+          result shouldBe Good(ArrayBuffer(
+            0x10, 0x1A,     // HBY $01 RA
+            0x20, 0x0A,     // LBY $00 RA
+            0x3A, 0x01,     // LOD RA R1      ram[RA] => R1
+            0x20, 0x1A,     // LBY $01 RA
+            0x3A, 0x02,     // LOD RA R2      ram[RA] => R2
+            0x51, 0x23,     // ADD R1 R2 R3   R1 + R2 => R3
+            0x20, 0x2A,     // LBY $00 RA
+            0x4A, 0x30,     // STR RA R3      R3 => ram[RA]
+            0x00, 0x00      // END
+          ).map(_.toByte))
         }
       }
 

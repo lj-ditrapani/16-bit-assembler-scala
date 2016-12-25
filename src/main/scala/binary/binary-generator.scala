@@ -4,7 +4,7 @@ import info.ditrapani.asm.symboltable.SymbolResults
 
 object BinaryGenerator {
   def generate(symbolResults: SymbolResults): Either[String, BinaryResult] =
-    Right(BinaryResult(List(65.toByte, 66.toByte, 10.toByte)))
+    Right(BinaryResult(symbolResults.instructions.flatMap(_.toBinary())))
 }
 
 final case class BinaryResult(bytes: Seq[Byte])
