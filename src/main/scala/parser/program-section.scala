@@ -54,7 +54,8 @@ final case class Str(
   ).map(_.toByte)
 }
 
-sealed abstract class ThreeOperand(
+final case class ThreeOperandInstruction(
+    mnemonic: String,
     op_code: Int,
     index: Int,
     source_register_1: Number4,
@@ -66,54 +67,16 @@ sealed abstract class ThreeOperand(
   ).map(_.toByte)
 }
 
-final case class Add(
-    index: Int,
-    source_register_1: Number4,
-    source_register_2: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0x50, index, source_register_1, source_register_2, destination_register)
-
-final case class Sub(
-    index: Int,
-    source_register_1: Number4,
-    source_register_2: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0x60, index, source_register_1, source_register_2, destination_register)
-
-final case class Adi(
-    index: Int,
-    source_register_1: Number4,
-    immediate_4_bit: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0x70, index, source_register_1, immediate_4_bit, destination_register)
-
-final case class Sbi(
-    index: Int,
-    source_register_1: Number4,
-    immediate_4_bit: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0x80, index, source_register_1, immediate_4_bit, destination_register)
-
-final case class And(
-    index: Int,
-    source_register_1: Number4,
-    source_register_2: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0x90, index, source_register_1, source_register_2, destination_register)
-
-final case class Orr(
-    index: Int,
-    source_register_1: Number4,
-    source_register_2: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0xA0, index, source_register_1, source_register_2, destination_register)
-
-final case class Xor(
-    index: Int,
-    source_register_1: Number4,
-    source_register_2: Number4,
-    destination_register: Number4) extends ThreeOperand(
-      0xB0, index, source_register_1, source_register_2, destination_register)
+object ThreeOperandInstruction {
+  def selectMaker
+    (mnemonic: String, op_code: Int)
+    (parsed_values: (Int, (Number4, Number4, Number4))): ThreeOperandInstruction = {
+    val (index, (source_register_1, operand_2, destination_register)) = parsed_values
+    ThreeOperandInstruction(
+      mnemonic, op_code, index, source_register_1, operand_2, destination_register
+    )
+  }
+}
 
 object ProgramSection {
   import fastparse.all._
@@ -153,36 +116,31 @@ object ProgramSection {
   val three_operands =
     spaces ~/ number4bit ~/ spaces ~/ number4bit ~/spaces ~/number4bit
 
-  def to_three_operand_instruction[T <: ThreeOperand](
-      operands: (Int, (Number4, Number4, Number4)),
-      constructor: (Int, Number4, Number4, Number4) => T
-  ): T = {
-     val (index, (source_register_1, source_register_2, destination_register)) = operands
-    constructor(index, source_register_1, source_register_2, destination_register)
-  }
-
   val add = P(Index ~ IgnoreCase("ADD") ~/ three_operands)
-    .map(to_three_operand_instruction(_, Add.apply _))
+    .map(ThreeOperandInstruction.selectMaker("ADD", 0x50))
 
   val sub = P(Index ~ IgnoreCase("SUB") ~/ three_operands)
-    .map(to_three_operand_instruction(_, Sub.apply _))
+    .map(ThreeOperandInstruction.selectMaker("SUB", 0x60))
 
   val adi = P(Index ~ IgnoreCase("ADI") ~/ three_operands)
-    .map(to_three_operand_instruction(_, Adi.apply _))
+    .map(ThreeOperandInstruction.selectMaker("ADI", 0x70))
 
   val sbi = P(Index ~ IgnoreCase("SBI") ~/ three_operands)
-    .map(to_three_operand_instruction(_, Sbi.apply _))
+    .map(ThreeOperandInstruction.selectMaker("SBI", 0x80))
 
   val and = P(Index ~ IgnoreCase("AND") ~/ three_operands)
-    .map(to_three_operand_instruction(_, And.apply _))
+    .map(ThreeOperandInstruction.selectMaker("AND", 0x90))
 
   val orr = P(Index ~ IgnoreCase("ORR") ~/ three_operands)
-    .map(to_three_operand_instruction(_, Orr.apply _))
+    .map(ThreeOperandInstruction.selectMaker("ORR", 0xA0))
 
   val xor = P(Index ~ IgnoreCase("XOR") ~/ three_operands)
-    .map(to_three_operand_instruction(_, Xor.apply _))
+    .map(ThreeOperandInstruction.selectMaker("XOR", 0xB0))
 
-  val instruction = P(end |[RealInstruction] hby | lby | lod | str | add)
+  val instruction = P(
+    end.|[RealInstruction](hby) | lby | lod | str |
+    add | sub | adi | sbi | and | orr | xor
+  )
 
   val program_entry = P(optional_spaces ~ instruction ~/ tail_noise ~/ "\n" ~/ noise)
   val program_section = P(

@@ -45,7 +45,7 @@ class ProgramSectionSpec extends Spec {
         Lod(298, Number4(10), Number4(1)),
         Lby(341, Number8(1), Number4(10)),
         Lod(371, Number4(10), Number4(2)),
-        Add(414, Number4(1), Number4(2), Number4(3)),
+        ThreeOperandInstruction("ADD", 0x50, 414, Number4(1), Number4(2), Number4(3)),
         Lby(424, Number8(2), Number4(10)),
         Str(454, Number4(10), Number4(3)),
         IEnd(500)
