@@ -1,6 +1,10 @@
 - Implement parsers and binary generators for other 10 instructions
 - Refactor .program-rom section.  Use superclass to remove repetition
   within groups of instructions with identical structure.
+- Move instructions out of program-section since they cross package boundaries
+    - they know about symbol tables & binary generation; they are created by the parser
+- Move Number4,8,16 classes from asm.parser.number package up to asm.number package
+    - They are used everywhere
 - program_section is mandatory
 - Make symbols_section, video_section, & data_section optional
 - Update spec to have optional sections
