@@ -16,21 +16,21 @@ final case class IEnd(index: Int) extends RealInstruction {
 
 final case class Hby(
     index: Int,
-    immediate8bit: Number8,
+    immediate_8_bit: Number8,
     destination_register: Number4) extends RealInstruction {
   def toBinary(): Seq[Byte] = Seq(
-    0x10 | immediate8bit.value >> 4,
-    (immediate8bit.value & 0x0F) << 4 | destination_register.value
+    0x10 | immediate_8_bit.value >> 4,
+    (immediate_8_bit.value & 0x0F) << 4 | destination_register.value
   ).map(_.toByte)
 }
 
 final case class Lby(
     index: Int,
-    immediate8bit: Number8,
+    immediate_8_bit: Number8,
     destination_register: Number4) extends RealInstruction {
   def toBinary(): Seq[Byte] = Seq(
-    0x20 | immediate8bit.value >> 4,
-    (immediate8bit.value & 0x0F) << 4 | destination_register.value
+    0x20 | immediate_8_bit.value >> 4,
+    (immediate_8_bit.value & 0x0F) << 4 | destination_register.value
   ).map(_.toByte)
 }
 
@@ -54,16 +54,66 @@ final case class Str(
   ).map(_.toByte)
 }
 
+sealed abstract class ThreeOperand(
+    op_code: Int,
+    index: Int,
+    source_register_1: Number4,
+    operand_2: Number4,
+    destination_register: Number4) extends RealInstruction {
+  def toBinary(): Seq[Byte] = Seq(
+    op_code | source_register_1.value,
+    operand_2.value << 4 | destination_register.value
+  ).map(_.toByte)
+}
+
 final case class Add(
     index: Int,
     source_register_1: Number4,
     source_register_2: Number4,
-    destination_register: Number4) extends RealInstruction {
-  def toBinary(): Seq[Byte] = Seq(
-    0x50 | source_register_1.value,
-    source_register_2.value << 4 | destination_register.value
-  ).map(_.toByte)
-}
+    destination_register: Number4) extends ThreeOperand(
+      0x50, index, source_register_1, source_register_2, destination_register)
+
+final case class Sub(
+    index: Int,
+    source_register_1: Number4,
+    source_register_2: Number4,
+    destination_register: Number4) extends ThreeOperand(
+      0x60, index, source_register_1, source_register_2, destination_register)
+
+final case class Adi(
+    index: Int,
+    source_register_1: Number4,
+    immediate_4_bit: Number4,
+    destination_register: Number4) extends ThreeOperand(
+      0x70, index, source_register_1, immediate_4_bit, destination_register)
+
+final case class Sbi(
+    index: Int,
+    source_register_1: Number4,
+    immediate_4_bit: Number4,
+    destination_register: Number4) extends ThreeOperand(
+      0x80, index, source_register_1, immediate_4_bit, destination_register)
+
+final case class And(
+    index: Int,
+    source_register_1: Number4,
+    source_register_2: Number4,
+    destination_register: Number4) extends ThreeOperand(
+      0x90, index, source_register_1, source_register_2, destination_register)
+
+final case class Orr(
+    index: Int,
+    source_register_1: Number4,
+    source_register_2: Number4,
+    destination_register: Number4) extends ThreeOperand(
+      0xA0, index, source_register_1, source_register_2, destination_register)
+
+final case class Xor(
+    index: Int,
+    source_register_1: Number4,
+    source_register_2: Number4,
+    destination_register: Number4) extends ThreeOperand(
+      0xB0, index, source_register_1, source_register_2, destination_register)
 
 object ProgramSection {
   import fastparse.all._
@@ -75,15 +125,15 @@ object ProgramSection {
   val hby = P(
     Index ~ IgnoreCase("HBY") ~/ spaces ~/ number8bit ~/ spaces ~/ number4bit
   ).map {
-    case (index, immediate8bit, destination_register) =>
-      Hby(index, immediate8bit, destination_register)
+    case (index, immediate_8_bit, destination_register) =>
+      Hby(index, immediate_8_bit, destination_register)
   }
 
   val lby = P(
     Index ~ IgnoreCase("LBY") ~/ spaces ~/ number8bit ~/ spaces ~/ number4bit
   ).map {
-    case (index, immediate8bit, destination_register) =>
-      Lby(index, immediate8bit, destination_register)
+    case (index, immediate_8_bit, destination_register) =>
+      Lby(index, immediate_8_bit, destination_register)
   }
 
   val lod = P(
@@ -100,15 +150,39 @@ object ProgramSection {
       Str(index, address_register, value_register)
   }
 
-  val add = P(
-    Index ~ IgnoreCase("ADD") ~/ spaces ~/
-    number4bit ~/ spaces ~/ number4bit ~/spaces ~/number4bit
-  ).map {
-    case (index, source_register_1, source_register_2, destination_register) =>
-      Add(index, source_register_1, source_register_2, destination_register)
+  val three_operands =
+    spaces ~/ number4bit ~/ spaces ~/ number4bit ~/spaces ~/number4bit
+
+  def to_three_operand_instruction[T <: ThreeOperand](
+      operands: (Int, (Number4, Number4, Number4)),
+      constructor: (Int, Number4, Number4, Number4) => T
+  ): T = {
+     val (index, (source_register_1, source_register_2, destination_register)) = operands
+    constructor(index, source_register_1, source_register_2, destination_register)
   }
 
-  val instruction = P(end | hby.|[RealInstruction](lby) | lod | str | add)
+  val add = P(Index ~ IgnoreCase("ADD") ~/ three_operands)
+    .map(to_three_operand_instruction(_, Add.apply _))
+
+  val sub = P(Index ~ IgnoreCase("SUB") ~/ three_operands)
+    .map(to_three_operand_instruction(_, Sub.apply _))
+
+  val adi = P(Index ~ IgnoreCase("ADI") ~/ three_operands)
+    .map(to_three_operand_instruction(_, Adi.apply _))
+
+  val sbi = P(Index ~ IgnoreCase("SBI") ~/ three_operands)
+    .map(to_three_operand_instruction(_, Sbi.apply _))
+
+  val and = P(Index ~ IgnoreCase("AND") ~/ three_operands)
+    .map(to_three_operand_instruction(_, And.apply _))
+
+  val orr = P(Index ~ IgnoreCase("ORR") ~/ three_operands)
+    .map(to_three_operand_instruction(_, Orr.apply _))
+
+  val xor = P(Index ~ IgnoreCase("XOR") ~/ three_operands)
+    .map(to_three_operand_instruction(_, Xor.apply _))
+
+  val instruction = P(end |[RealInstruction] hby | lby | lod | str | add)
 
   val program_entry = P(optional_spaces ~ instruction ~/ tail_noise ~/ "\n" ~/ noise)
   val program_section = P(

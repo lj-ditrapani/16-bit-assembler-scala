@@ -39,3 +39,4 @@
     - Can flatMap over classes that inject state and return new parsers
       to allow immutable symbol map & line number propagation.
 - Update spec to be more precise (esp when symbols can and can't be used)
+- Instructions & pseudo instructions can be written in upper or lower case? (update spec)
