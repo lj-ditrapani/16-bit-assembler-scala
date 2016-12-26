@@ -9,8 +9,9 @@ class ProgramSectionSpec extends Spec {
   val parser = P(Start ~/ ProgramSection.program_section ~/ End)
 
   it("parses a HBY instruction") {
+    val hby_instruction = ImmediateByteInstruction.hbyMaker((13, Number8(7), Number4(3)))
     parser.parse(".program-rom\nHBY 7 3\n.end-program-rom") shouldBe
-      Parsed.Success(ArrayBuffer(Hby(13, Number8(7), Number4(3))), 37)
+      Parsed.Success(ArrayBuffer(hby_instruction), 37)
   }
 
   it("parses an adding program") {
@@ -40,13 +41,13 @@ class ProgramSectionSpec extends Spec {
       |.end-program-rom""".stripMargin
     parser.parse(program).get.value shouldBe
       ArrayBuffer[RealInstruction](
-        Hby(275, Number8(1), Number4(10)),
-        Lby(286, Number8(0), Number4(10)),
-        Lod(298, Number4(10), Number4(1)),
-        Lby(341, Number8(1), Number4(10)),
-        Lod(371, Number4(10), Number4(2)),
+        ImmediateByteInstruction.hbyMaker((275, Number8(1), Number4(10))),
+        ImmediateByteInstruction.lbyMaker((286, Number8(0), Number4(10))),
+        TwoOperandInstruction("LOD", 0x30, 298, Number4(10), Number4(1)),
+        ImmediateByteInstruction.lbyMaker((341, Number8(1), Number4(10))),
+        TwoOperandInstruction("LOD", 0x30, 371, Number4(10), Number4(2)),
         ThreeOperandInstruction("ADD", 0x50, 414, Number4(1), Number4(2), Number4(3)),
-        Lby(424, Number8(2), Number4(10)),
+        ImmediateByteInstruction.lbyMaker((424, Number8(2), Number4(10))),
         Str(454, Number4(10), Number4(3)),
         IEnd(500)
       )

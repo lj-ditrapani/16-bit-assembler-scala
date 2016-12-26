@@ -14,34 +14,54 @@ final case class IEnd(index: Int) extends RealInstruction {
   def toBinary(): Seq[Byte] = Seq(0x00.toByte, 0x00.toByte)
 }
 
-final case class Hby(
+final case class ImmediateByteInstruction(
+    mnemonic: String,
+    op_code: Int,
     index: Int,
     immediate_8_bit: Number8,
     destination_register: Number4) extends RealInstruction {
   def toBinary(): Seq[Byte] = Seq(
-    0x10 | immediate_8_bit.value >> 4,
+    op_code | immediate_8_bit.value >> 4,
     (immediate_8_bit.value & 0x0F) << 4 | destination_register.value
   ).map(_.toByte)
 }
 
-final case class Lby(
-    index: Int,
-    immediate_8_bit: Number8,
-    destination_register: Number4) extends RealInstruction {
-  def toBinary(): Seq[Byte] = Seq(
-    0x20 | immediate_8_bit.value >> 4,
-    (immediate_8_bit.value & 0x0F) << 4 | destination_register.value
-  ).map(_.toByte)
+object ImmediateByteInstruction {
+  private def selectMaker
+    (mnemonic: String, op_code: Int)
+    (parsed_values: (Int, Number8, Number4)): ImmediateByteInstruction = {
+    val (index, immediate_8_bit, destination_register) = parsed_values
+    ImmediateByteInstruction(
+      mnemonic, op_code, index, immediate_8_bit, destination_register
+    )
+  }
+
+  val hbyMaker = selectMaker("HBY", 0x10) _
+
+  val lbyMaker = selectMaker("LBY", 0x20) _
 }
 
-final case class Lod(
+final case class TwoOperandInstruction(
+    mnemonic: String,
+    op_code: Int,
     index: Int,
     address_register: Number4,
     destination_register: Number4) extends RealInstruction {
   def toBinary(): Seq[Byte] = Seq(
-    0x30 | address_register.value,
+    op_code | address_register.value,
     destination_register.value
   ).map(_.toByte)
+}
+
+object TwoOperandInstruction {
+  def selectMaker
+    (mnemonic: String, op_code: Int)
+    (parsed_values: (Int, Number4, Number4)): TwoOperandInstruction = {
+    val (index, source_register_1, destination_register) = parsed_values
+    TwoOperandInstruction(
+      mnemonic, op_code, index, source_register_1, destination_register
+    )
+  }
 }
 
 final case class Str(
@@ -70,11 +90,31 @@ final case class ThreeOperandInstruction(
 object ThreeOperandInstruction {
   def selectMaker
     (mnemonic: String, op_code: Int)
-    (parsed_values: (Int, (Number4, Number4, Number4))): ThreeOperandInstruction = {
-    val (index, (source_register_1, operand_2, destination_register)) = parsed_values
+    (parsed_values: (Int, Number4, Number4, Number4)): ThreeOperandInstruction = {
+    val (index, source_register_1, operand_2, destination_register) = parsed_values
     ThreeOperandInstruction(
       mnemonic, op_code, index, source_register_1, operand_2, destination_register
     )
+  }
+}
+
+final case class Shf(
+    index: Int,
+    source_register_1: Number4,
+    direction: String,
+    ammount: Number4,
+    destination_register: Number4
+) extends RealInstruction {
+  def toBinary(): Seq[Byte] = {
+    val is_right = direction match {
+      case "R" => 1
+      case _ => 0
+    }
+    val direction_and_ammount = is_right << 3 | ammount.value - 1
+    Seq(
+      0xD0 | source_register_1.value,
+      direction_and_ammount << 4 | destination_register.value
+    ).map(_.toByte)
   }
 }
 
@@ -85,26 +125,19 @@ object ProgramSection {
 
   val end = P(Index ~ IgnoreCase("END")).map { IEnd(_) }
 
-  val hby = P(
-    Index ~ IgnoreCase("HBY") ~/ spaces ~/ number8bit ~/ spaces ~/ number4bit
-  ).map {
-    case (index, immediate_8_bit, destination_register) =>
-      Hby(index, immediate_8_bit, destination_register)
-  }
+  private def immediateByte(mnemonic: String) = P(
+    Index ~ IgnoreCase(mnemonic) ~/ spaces ~/ number8bit ~/ spaces ~/ number4bit
+  )
 
-  val lby = P(
-    Index ~ IgnoreCase("LBY") ~/ spaces ~/ number8bit ~/ spaces ~/ number4bit
-  ).map {
-    case (index, immediate_8_bit, destination_register) =>
-      Lby(index, immediate_8_bit, destination_register)
-  }
+  val hby = immediateByte("HBY").map(ImmediateByteInstruction.hbyMaker)
 
-  val lod = P(
-    Index ~ IgnoreCase("LOD") ~/ spaces ~/ number4bit ~/ spaces ~/ number4bit
-  ).map {
-    case (index, address_register, destination_register) =>
-      Lod(index, address_register, destination_register)
-  }
+  val lby = immediateByte("LBY").map(ImmediateByteInstruction.lbyMaker)
+
+  private def twoOperand(mnemonic: String) = P(
+    Index ~ IgnoreCase(mnemonic) ~/ spaces ~/ number4bit ~/ spaces ~/ number4bit
+  )
+
+  val lod = twoOperand("LOD").map(TwoOperandInstruction.selectMaker("LOD", 0x30))
 
   val str = P(
     Index ~ IgnoreCase("STR") ~/ spaces ~/ number4bit ~/ spaces ~/ number4bit
@@ -113,33 +146,47 @@ object ProgramSection {
       Str(index, address_register, value_register)
   }
 
-  val three_operands =
-    spaces ~/ number4bit ~/ spaces ~/ number4bit ~/spaces ~/number4bit
+  private def threeOperands(mnemonic: String) = P(
+    Index ~ IgnoreCase(mnemonic) ~/
+    spaces ~/ number4bit ~/
+    spaces ~/ number4bit ~/
+    spaces ~/ number4bit
+  )
 
-  val add = P(Index ~ IgnoreCase("ADD") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("ADD", 0x50))
+  val add = threeOperands("ADD").map(ThreeOperandInstruction.selectMaker("ADD", 0x50))
 
-  val sub = P(Index ~ IgnoreCase("SUB") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("SUB", 0x60))
+  val sub = threeOperands("SUB").map(ThreeOperandInstruction.selectMaker("SUB", 0x60))
 
-  val adi = P(Index ~ IgnoreCase("ADI") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("ADI", 0x70))
+  val adi = threeOperands("ADI").map(ThreeOperandInstruction.selectMaker("ADI", 0x70))
 
-  val sbi = P(Index ~ IgnoreCase("SBI") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("SBI", 0x80))
+  val sbi = threeOperands("SBI").map(ThreeOperandInstruction.selectMaker("SBI", 0x80))
 
-  val and = P(Index ~ IgnoreCase("AND") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("AND", 0x90))
+  val and = threeOperands("AND").map(ThreeOperandInstruction.selectMaker("AND", 0x90))
 
-  val orr = P(Index ~ IgnoreCase("ORR") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("ORR", 0xA0))
+  val orr = threeOperands("ORR").map(ThreeOperandInstruction.selectMaker("ORR", 0xA0))
 
-  val xor = P(Index ~ IgnoreCase("XOR") ~/ three_operands)
-    .map(ThreeOperandInstruction.selectMaker("XOR", 0xB0))
+  val xor = threeOperands("XOR").map(ThreeOperandInstruction.selectMaker("XOR", 0xB0))
+
+  val not = twoOperand("NOT").map(TwoOperandInstruction.selectMaker("NOT", 0xC0))
+
+  val number1to8 = number4bit.flatMap(n =>
+    (n.value >= 1 && n.value <= 8) match {
+      case true => Pass.map(x => n)
+      case false => Fail.opaque("SHF shift ammount must be a number in 1-8 inclusive")
+    }
+  )
+
+  val shf = P(
+    Index ~ IgnoreCase("SHF") ~/ spaces ~/ number4bit ~/ spaces ~/
+    ("L" | "R").! ~/ number1to8 ~/ number4bit
+  ).map {
+    case (index, source_register_1, direction, ammount, destination_register) =>
+      Shf(index, source_register_1, direction, ammount, destination_register)
+  }
 
   val instruction = P(
     end.|[RealInstruction](hby) | lby | lod | str |
-    add | sub | adi | sbi | and | orr | xor
+    add | sub | adi | sbi | and | orr | xor | not | shf
   )
 
   val program_entry = P(optional_spaces ~ instruction ~/ tail_noise ~/ "\n" ~/ noise)
