@@ -1,13 +1,26 @@
-- Implement parsers and binary generators for other 10 instructions
-- Refactor .program-rom section.  Use superclass to remove repetition
-  within groups of instructions with identical structure.
+- More full program tests (while loop, branching)
+    - no symbols/data/video yet
+- Implement labels
+- Implement fill symbols
+- Implement intructions can have symbol or number operands
+- Implement 2 data commands: word & move; with fill symbols
+- WRD pseudo instruction
 - Move instructions out of program-section since they cross package boundaries
     - they know about symbol tables & binary generation; they are created by the parser
 - Move Number4,8,16 classes from asm.parser.number package up to asm.number package
     - They are used everywhere
+- pseudo instructions
 - program_section is mandatory
 - Make symbols_section, video_section, & data_section optional
 - Update spec to have optional sections
+- symbols section
+    - disallow defining predefined symbols (later pass)
+- Update spec to be more precise (esp when symbols can and can't be used)
+- Instructions & pseudo instructions can be written in upper or lower case? (update spec)
+- rest of data section
+- video rom section
+
+
 - 3 passes
     - 1) parse string into domain objects. Outputs for each section:
         - Symbols:      Seq of symbol entries
@@ -28,15 +41,3 @@
           ===[enter tags into symbol_table]===>
           Seq[Command], symbol_table4
     - 3) Fill in symbols & generate binary
-- 3 packages (match up with passes)
-    - 1) parser (converts text to domain objects)
-    - 2) symbol table
-    - 3) binary generator
-- symbols section
-    - symbols table
-    - disallow defining predefined symbols (later pass)
-- main assembler parser
-    - Can flatMap over classes that inject state and return new parsers
-      to allow immutable symbol map & line number propagation.
-- Update spec to be more precise (esp when symbols can and can't be used)
-- Instructions & pseudo instructions can be written in upper or lower case? (update spec)
