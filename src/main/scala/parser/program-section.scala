@@ -144,7 +144,21 @@ final case class Brv(
   ).map(_.toByte)
 }
 
-final case class Brf()
+sealed abstract class FlagCondition { def toNibble: Int }
+object CarryFlag extends FlagCondition { def toNibble: Int = 1 }
+object OverflowFlag extends FlagCondition { def toNibble: Int = 2 }
+object BothFlags extends FlagCondition { def toNibble: Int = 3 }
+
+final case class Brf(
+    index: Int,
+    condition: FlagCondition,
+    address_register: Number4
+) extends RealInstruction {
+  def toBinary(): Seq[Byte] = Seq(
+    0xF0,
+    address_register.value << 4 | condition.toNibble
+  ).map(_.toByte)
+}
 
 object ProgramSection {
   import fastparse.all._
@@ -221,9 +235,19 @@ object ProgramSection {
     value_conditions ~/ spaces ~/ number4bit
   ).map(Brv.tupled)
 
+  val flag_condition = (
+    P("C").map(_ => CarryFlag) |
+    P("O").map(_ => OverflowFlag) |
+    P("-").map(_ => BothFlags)
+  )
+
+  val brf = P(
+    Index ~ IgnoreCase("BRF") ~/ spaces ~/ flag_condition ~/ spaces ~/ number4bit
+  ).map(Brf.tupled)
+
   val instruction = P(
-    end.|[RealInstruction](hby) | lby | lod | str |
-    add | sub | adi | sbi | and | orr | xor | not | shf | brv
+    end.|[RealInstruction](hby) | lby | lod | str | add | sub |
+    adi | sbi | and | orr | xor | not | shf | brv | brf
   )
 
   val program_entry = P(optional_spaces ~ instruction ~/ tail_noise ~/ "\n" ~/ noise)
