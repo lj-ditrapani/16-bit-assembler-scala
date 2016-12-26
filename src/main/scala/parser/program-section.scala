@@ -118,6 +118,34 @@ final case class Shf(
   }
 }
 
+final case class ValueConditions(negative: Boolean, zero: Boolean, positive: Boolean) {
+  private def bool2int(b: Boolean): Int = b match {
+    case true => 1
+    case false => 0
+  }
+
+  def toNibble: Int = {
+    val n = bool2int(negative)
+    val z = bool2int(zero)
+    val p = bool2int(positive)
+    n << 2 | z << 1 | p
+  }
+}
+
+final case class Brv(
+    index: Int,
+    value_register: Number4,
+    conditions: ValueConditions,
+    address_register: Number4
+) extends RealInstruction {
+  def toBinary(): Seq[Byte] = Seq(
+    0xE0 | value_register.value,
+    address_register.value << 4 | conditions.toNibble
+  ).map(_.toByte)
+}
+
+final case class Brf()
+
 object ProgramSection {
   import fastparse.all._
   import info.ditrapani.asm.parser.BasicParsers._
@@ -141,10 +169,7 @@ object ProgramSection {
 
   val str = P(
     Index ~ IgnoreCase("STR") ~/ spaces ~/ number4bit ~/ spaces ~/ number4bit
-  ).map {
-    case (index, address_register, value_register) =>
-      Str(index, address_register, value_register)
-  }
+  ).map(Str.tupled)
 
   private def threeOperands(mnemonic: String) = P(
     Index ~ IgnoreCase(mnemonic) ~/
@@ -179,14 +204,26 @@ object ProgramSection {
   val shf = P(
     Index ~ IgnoreCase("SHF") ~/ spaces ~/ number4bit ~/ spaces ~/
     ("L" | "R").! ~/ number1to8 ~/ number4bit
-  ).map {
-    case (index, source_register_1, direction, ammount, destination_register) =>
-      Shf(index, source_register_1, direction, ammount, destination_register)
-  }
+  ).map(Shf.tupled)
+
+  val value_conditions = (
+    P("NZP").map(_ => (true, true, true)) |
+    P("NZ").map(_ => (true, true, false)) |
+    P("NP").map(_ => (true, false, true)) |
+    P("ZP").map(_ => (false, true, true)) |
+    P("N").map(_ => (true, false, false)) |
+    P("Z").map(_ => (false, true, false)) |
+    P("P").map(_ => (false, false, true))
+  ).map(ValueConditions.tupled(_))
+
+  val brv = P(
+    Index ~ IgnoreCase("BRV") ~/ spaces ~/ number4bit ~/ spaces ~/
+    value_conditions ~/ spaces ~/ number4bit
+  ).map(Brv.tupled)
 
   val instruction = P(
     end.|[RealInstruction](hby) | lby | lod | str |
-    add | sub | adi | sbi | and | orr | xor | not | shf
+    add | sub | adi | sbi | and | orr | xor | not | shf | brv
   )
 
   val program_entry = P(optional_spaces ~ instruction ~/ tail_noise ~/ "\n" ~/ noise)
