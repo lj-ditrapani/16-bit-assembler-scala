@@ -1,10 +1,8 @@
-- More full program tests (while loop, branching)
-    - no symbols/data/video yet
 - Implement labels
 - Implement fill symbols
 - Implement intructions can have symbol or number operands
 - Implement 2 data commands: word & move; with fill symbols
-- WRD pseudo instruction
+- WRD pseudo instruction (with symbol or number)
 - Move instructions out of program-section since they cross package boundaries
     - they know about symbol tables & binary generation; they are created by the parser
 - Move Number4,8,16 classes from asm.parser.number package up to asm.number package
