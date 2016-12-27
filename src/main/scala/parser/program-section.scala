@@ -145,9 +145,9 @@ final case class Brv(
 }
 
 sealed abstract class FlagCondition { def toNibble: Int }
+object NoFlags extends FlagCondition { def toNibble: Int = 0 }
 object CarryFlag extends FlagCondition { def toNibble: Int = 1 }
 object OverflowFlag extends FlagCondition { def toNibble: Int = 2 }
-object BothFlags extends FlagCondition { def toNibble: Int = 3 }
 
 final case class Brf(
     index: Int,
@@ -217,7 +217,7 @@ object ProgramSection {
 
   val shf = P(
     Index ~ IgnoreCase("SHF") ~/ spaces ~/ number4bit ~/ spaces ~/
-    ("L" | "R").! ~/ number1to8 ~/ number4bit
+    ("L" | "R").! ~/ spaces ~/ number1to8 ~/ spaces ~/ number4bit
   ).map(Shf.tupled)
 
   val value_conditions = (
@@ -236,9 +236,9 @@ object ProgramSection {
   ).map(Brv.tupled)
 
   val flag_condition = (
+    P("-").map(_ => NoFlags) |
     P("C").map(_ => CarryFlag) |
-    P("O").map(_ => OverflowFlag) |
-    P("-").map(_ => BothFlags)
+    P("V").map(_ => OverflowFlag)
   )
 
   val brf = P(

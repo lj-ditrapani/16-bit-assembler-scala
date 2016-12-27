@@ -7,7 +7,8 @@ object BasicParsers {
   val optional_spaces = " ".rep
   val spaces = P(" ".rep(1))
   val tail_noise = P((spaces ~/ comment) | optional_spaces)
-  val noise = P(optional_spaces ~ comment.? ~ "\n").rep
+  val empty_text = optional_spaces ~ comment.?
+  val noise = P(empty_text ~ "\n").rep
 
   val symbol = {
     val digit = P(CharIn('0' to '9'))

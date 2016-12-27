@@ -19,6 +19,7 @@ object AsmParser {
       program.ProgramSection.program_section ~/ noise ~/
       video.VideoSection.video_section ~/ noise ~/
       data.DataSection.data_section ~/ noise ~/
+      empty_text ~/
       End
     )
   }
